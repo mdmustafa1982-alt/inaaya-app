@@ -753,7 +753,14 @@ function checkNewDay(){
 }
 document.addEventListener("visibilitychange",()=>{if(!document.hidden) checkNewDay()});
 setInterval(checkNewDay,60000);
-if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+if("serviceWorker" in navigator){
+  // When a new version takes over, reload once so the new screens appear straight away.
+  const hadController=!!navigator.serviceWorker.controller;let reloaded=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(hadController&&!reloaded){reloaded=true;location.reload()}});
+  navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(reg=>{
+    document.addEventListener("visibilitychange",()=>{if(!document.hidden)reg.update().catch(()=>{})});
+  }).catch(()=>{});
+}
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
 
 render();
