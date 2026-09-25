@@ -72,13 +72,29 @@ button{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webk
 .daybtns{display:flex;align-items:center;gap:8px}
 .savebtn,.editbtn{font-family:var(--display);font-weight:600;font-size:16px;border-radius:99px;padding:7px 16px;cursor:pointer;white-space:nowrap}
 .savebtn{background:var(--noon);color:var(--check-ink);border:2px solid var(--noon)}
-.editbtn{background:var(--paper);color:var(--ink);border:2px solid var(--line);position:relative;overflow:hidden;-webkit-touch-callout:none}
-.editbtn::before{content:"";position:absolute;inset:0;background:var(--gold);opacity:.45;transform:scaleX(0);transform-origin:left;transition:transform .15s}
-.editbtn.holding::before{transform:scaleX(1);transition:transform 1.5s linear}
-.editbtn span{position:relative}
+.editbtn{background:var(--paper);color:var(--ink);border:2px solid var(--line);display:inline-flex;align-items:center;gap:6px}
+.editbtn svg{width:15px;height:15px}
 .editbtn.nudge{animation:nudge .45s ease;border-color:var(--gold)}
 @keyframes nudge{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
 .savebtn:focus-visible,.editbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+
+/* parent PIN keypad */
+.pinwrap{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;background:rgba(20,23,41,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.pinbox{background:var(--paper);color:var(--ink);border-radius:26px;padding:24px 26px 18px;width:min(340px,100%);text-align:center;box-shadow:0 24px 60px -20px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:14px}
+.pinbox h2{font-family:var(--display);font-weight:600;font-size:22px;margin:0}
+.pinmsg{margin:-6px 0 0;font-weight:700;font-size:14px;color:var(--ink-2);min-height:2.7em;text-wrap:balance}
+.pinmsg.err{color:var(--all)}
+.pinshow{height:30px;display:flex;justify-content:center;align-items:center;gap:14px;font-family:var(--display);font-weight:700;font-size:28px;font-variant-numeric:tabular-nums}
+.pinshow i{width:16px;height:16px;border-radius:50%;border:2.5px solid var(--dusk)}
+.pinshow i.on{background:var(--dusk)}
+.pinshow.shake{animation:nudge .45s ease}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pad button{font-family:var(--display);font-weight:600;font-size:26px;height:62px;border-radius:18px;border:2px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.pad button:active{background:var(--dusk-tint);border-color:var(--dusk)}
+.pad button.fn{font-family:var(--body);font-weight:800;font-size:14px;background:none;border-color:transparent;color:var(--ink-2)}
+.pad button:focus-visible,.pinlinks button:focus-visible{outline:3px solid var(--dusk);outline-offset:2px}
+.pinlinks{display:flex;justify-content:space-between;gap:10px}
+.pinlinks button{font:inherit;font-weight:800;font-size:13px;background:none;border:0;color:var(--dusk);padding:6px 4px;cursor:pointer}
 .saved-note{font-weight:800;font-size:13px;color:var(--noon);white-space:nowrap}
 #dayView.locked .task,#dayView.locked .cup,#dayView.locked .seg button{cursor:default}
 #dayView.locked .task:hover{background:none}
@@ -286,6 +302,20 @@ footer{margin-top:18px;display:flex;justify-content:space-between;align-items:ce
 <body>
 
 <canvas id="confetti" aria-hidden="true"></canvas>
+<div class="pinwrap" id="pinWrap" hidden role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+  <div class="pinbox">
+    <h2 id="pinTitle">Parent PIN</h2>
+    <p class="pinmsg" id="pinMsg" aria-live="polite"></p>
+    <div class="pinshow" id="pinShow" aria-hidden="true"></div>
+    <div class="pad" id="pad">
+      <button type="button" id="k1" data-k="1">1</button><button type="button" id="k2" data-k="2">2</button><button type="button" id="k3" data-k="3">3</button>
+      <button type="button" id="k4" data-k="4">4</button><button type="button" id="k5" data-k="5">5</button><button type="button" id="k6" data-k="6">6</button>
+      <button type="button" id="k7" data-k="7">7</button><button type="button" id="k8" data-k="8">8</button><button type="button" id="k9" data-k="9">9</button>
+      <button type="button" id="kCancel" class="fn" data-k="cancel">Cancel</button><button type="button" id="k0" data-k="0">0</button><button type="button" id="kBack" class="fn" data-k="back" aria-label="Delete">⌫</button>
+    </div>
+    <div class="pinlinks" id="pinLinks"><button type="button" id="pinForgot">Forgot PIN?</button><button type="button" id="pinChange">Change PIN</button></div>
+  </div>
+</div>
 <div class="appbar">
   <div class="appbar-in">
     <nav class="tabs" role="tablist" aria-label="Scoreboard view">
@@ -296,7 +326,7 @@ footer{margin-top:18px;display:flex;justify-content:space-between;align-items:ce
       <div class="daybtns" id="dayBtns">
         <span class="saved-note" id="savedNote" hidden></span>
         <button type="button" class="savebtn" id="saveDay">Save my day</button>
-        <button type="button" class="editbtn" id="editDay" hidden aria-label="Hold to edit this day"><span>Hold to edit</span></button>
+        <button type="button" class="editbtn" id="editDay" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>Edit</button>
       </div>
       <span class="pill" id="pill" aria-hidden="true">★ <span id="pillScore">0</span><small> / 78</small></span>
     </div>
@@ -522,22 +552,93 @@ resetBtn.addEventListener("click",()=>{
   if(!resetBtn.classList.contains("arm")){resetBtn.classList.add("arm");resetBtn.textContent="Tap again to clear";return}
   store.del(keyFor(current));setDay(current);
 });
-/* ---------- save the day (locks it) / hold to edit ---------- */
+/* ---------- save the day (locks it) / parent PIN to edit ---------- */
 const saveBtn=document.getElementById("saveDay"),editBtn=document.getElementById("editDay");
 saveBtn.addEventListener("click",()=>{
   state.saved=Date.now();save();paint();
   const r=saveBtn.getBoundingClientRect();confetti(r.left+r.width/2,r.bottom,120);
 });
-let holdTimer=0;
-function endHold(){clearTimeout(holdTimer);editBtn.classList.remove("holding")}
-editBtn.addEventListener("pointerdown",e=>{
-  e.preventDefault();editBtn.classList.add("holding");
-  holdTimer=setTimeout(()=>{endHold();state.saved=null;save();paint()},1500);
-});
-["pointerup","pointerleave","pointercancel"].forEach(ev=>editBtn.addEventListener(ev,endHold));
-editBtn.addEventListener("contextmenu",e=>e.preventDefault());
-editBtn.addEventListener("click",e=>{if(e.detail===0){state.saved=null;save();paint()}}); // keyboard Enter/Space
 function nudgeEdit(){editBtn.classList.remove("nudge");void editBtn.offsetWidth;editBtn.classList.add("nudge")}
+function unlockDay(){state.saved=null;save();paint()}
+
+const PIN_KEY="inaaya-parent-pin";
+async function hashPin(p){
+  try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode("inaaya:"+p));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+  catch(e){return "plain:"+p}
+}
+const getPin=()=>{try{return localStorage.getItem(PIN_KEY)}catch(e){return null}};
+const setPin=h=>{try{localStorage.setItem(PIN_KEY,h)}catch(e){}};
+
+const pin={mode:"",buf:"",first:"",answer:"",then:null,lastFocus:null};
+const pinWrap=document.getElementById("pinWrap"),pinMsg=document.getElementById("pinMsg"),pinShow=document.getElementById("pinShow");
+const MSGS={
+  enter:["Parent PIN","Enter your 4-digit PIN to edit this day."],
+  create:["Create a parent PIN","Choose 4 digits. You’ll need them to edit a saved day."],
+  confirm:["Confirm your PIN","Type the same 4 digits again."],
+  change:["Change PIN","First, enter your current PIN."],
+  gate:["Grown-ups only",""]
+};
+function openPin(mode,then){
+  pin.lastFocus=document.activeElement;pin.then=then||null;
+  pinWrap.hidden=false;setPinMode(mode);
+  document.getElementById("k1").focus();
+}
+function setPinMode(mode,msg){
+  pin.mode=mode;pin.buf="";
+  if(mode==="gate"){
+    const a=6+Math.floor(Math.random()*4),b=6+Math.floor(Math.random()*4),c=11+Math.floor(Math.random()*8);
+    pin.answer=String(a*b+c);MSGS.gate[1]=`To reset the PIN, what is ${a} × ${b} + ${c}?`;
+  }
+  document.getElementById("pinTitle").textContent=MSGS[mode][0];
+  pinMsg.textContent=mode==="gate"&&msg?msg+" "+MSGS.gate[1]:(msg||MSGS[mode][1]);
+  pinMsg.classList.toggle("err",!!msg);
+  document.getElementById("pinLinks").hidden=!(mode==="enter");
+  drawPin();
+}
+function drawPin(){
+  if(pin.mode==="gate"){pinShow.textContent=pin.buf||"?";return}
+  pinShow.innerHTML=[0,1,2,3].map(i=>`<i class="${i<pin.buf.length?"on":""}"></i>`).join("");
+}
+function closePin(){pinWrap.hidden=true;pin.buf="";pin.first="";if(pin.lastFocus&&pin.lastFocus.focus)pin.lastFocus.focus()}
+function wrong(msg){pinShow.classList.remove("shake");void pinShow.offsetWidth;pinShow.classList.add("shake");setPinMode(pin.mode,msg)}
+async function pinComplete(){
+  const v=pin.buf;
+  if(pin.mode==="gate"){
+    if(v===pin.answer) setPinMode("create"); else wrong("Not quite, try this one.");
+    return;
+  }
+  if(pin.mode==="create"){pin.first=v;setPinMode("confirm");return}
+  if(pin.mode==="confirm"){
+    if(v!==pin.first){pin.first="";setPinMode("create","Those didn’t match. Choose your 4 digits again.");return}
+    setPin(await hashPin(v));const t=pin.then;
+    if(t){closePin();t()}
+    else {pinMsg.textContent="PIN saved ✓";pinMsg.classList.remove("err");setTimeout(closePin,900)}
+    return;
+  }
+  const ok=(await hashPin(v))===getPin();
+  if(!ok){wrong("That PIN isn’t right. Try again.");return}
+  if(pin.mode==="change"){setPinMode("create");return}
+  const t=pin.then;closePin();if(t)t();
+}
+function pinKey(k){
+  if(k==="cancel"){closePin();return}
+  if(k==="back"){pin.buf=pin.buf.slice(0,-1);drawPin();return}
+  const max=pin.mode==="gate"?pin.answer.length:4;
+  if(pin.buf.length>=max) return;
+  pin.buf+=k;drawPin();
+  if(pin.buf.length===max) setTimeout(pinComplete,120);
+}
+document.getElementById("pad").addEventListener("click",e=>{const b=e.target.closest("[data-k]");if(b)pinKey(b.dataset.k)});
+document.getElementById("pinForgot").onclick=()=>setPinMode("gate");
+document.getElementById("pinChange").onclick=()=>{pin.then=null;setPinMode("change")};
+pinWrap.addEventListener("click",e=>{if(e.target===pinWrap)closePin()});
+document.addEventListener("keydown",e=>{
+  if(pinWrap.hidden) return;
+  if(e.key==="Escape")closePin();
+  else if(/^[0-9]$/.test(e.key))pinKey(e.key);
+  else if(e.key==="Backspace")pinKey("back");
+});
+editBtn.addEventListener("click",()=>openPin(getPin()?"enter":"create",unlockDay));
 
 document.getElementById("prevDay").onclick=()=>{const d=new Date(current);d.setDate(d.getDate()-1);setDay(d)};
 document.getElementById("nextDay").onclick=()=>{const d=new Date(current);d.setDate(d.getDate()+1);if(d<=today)setDay(d)};
