@@ -67,6 +67,24 @@ button{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webk
 .pill{font-family:var(--display);font-weight:700;font-size:18px;background:var(--gold-tint);color:var(--gold-ink);border:2px solid var(--gold);border-radius:99px;padding:4px 14px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .pill small{font-size:13px;color:var(--ink-2);font-weight:600}
 .pill.bump{animation:bump .4s ease}
+.appbar-in{flex-wrap:wrap}
+.barright{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.daybtns{display:flex;align-items:center;gap:8px}
+.savebtn,.editbtn{font-family:var(--display);font-weight:600;font-size:16px;border-radius:99px;padding:7px 16px;cursor:pointer;white-space:nowrap}
+.savebtn{background:var(--noon);color:var(--check-ink);border:2px solid var(--noon)}
+.editbtn{background:var(--paper);color:var(--ink);border:2px solid var(--line);position:relative;overflow:hidden;-webkit-touch-callout:none}
+.editbtn::before{content:"";position:absolute;inset:0;background:var(--gold);opacity:.45;transform:scaleX(0);transform-origin:left;transition:transform .15s}
+.editbtn.holding::before{transform:scaleX(1);transition:transform 1.5s linear}
+.editbtn span{position:relative}
+.editbtn.nudge{animation:nudge .45s ease;border-color:var(--gold)}
+@keyframes nudge{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+.savebtn:focus-visible,.editbtn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.saved-note{font-weight:800;font-size:13px;color:var(--noon);white-space:nowrap}
+#dayView.locked .task,#dayView.locked .cup,#dayView.locked .seg button{cursor:default}
+#dayView.locked .task:hover{background:none}
+#dayView.locked .grid{filter:saturate(.85)}
+.reset:disabled{opacity:.4;cursor:default}
+.dsaved{font-size:11px;font-weight:800;color:var(--noon);letter-spacing:.04em}
 @keyframes bump{50%{transform:scale(1.12)}}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:10;width:100%;height:100%}
 @media (pointer:coarse){
@@ -274,7 +292,14 @@ footer{margin-top:18px;display:flex;justify-content:space-between;align-items:ce
       <button type="button" role="tab" id="tab-day" aria-controls="dayView" aria-selected="true">Today</button>
       <button type="button" role="tab" id="tab-week" aria-controls="weekView" aria-selected="false">This week</button>
     </nav>
-    <span class="pill" id="pill" aria-hidden="true">★ <span id="pillScore">0</span><small> / 78</small></span>
+    <div class="barright">
+      <div class="daybtns" id="dayBtns">
+        <span class="saved-note" id="savedNote" hidden></span>
+        <button type="button" class="savebtn" id="saveDay">Save my day</button>
+        <button type="button" class="editbtn" id="editDay" hidden aria-label="Hold to edit this day"><span>Hold to edit</span></button>
+      </div>
+      <span class="pill" id="pill" aria-hidden="true">★ <span id="pillScore">0</span><small> / 78</small></span>
+    </div>
   </div>
 </div>
 <div class="wrap">
@@ -369,7 +394,7 @@ let today = new Date(); today.setHours(12,0,0,0);
 let current = new Date(today);
 let state;
 
-function blank(){return {checks:{},water:[],family:"",piggy:"",proud:""}}
+function blank(){return {checks:{},water:[],family:"",piggy:"",proud:"",saved:null}}
 function load(d){return Object.assign(blank(), store.get(keyFor(d)) || {})}
 function scoreOf(s){
   if(!s) return null;
@@ -420,6 +445,7 @@ function specialCard(){
 function onClick(e){
   const t=e.target.closest(".task,.cup,.seg button");
   if(!t) return;
+  if(state.saved){nudgeEdit();return}
   if(t.classList.contains("task")){state.checks[t.dataset.k]=!state.checks[t.dataset.k]}
   else if(t.classList.contains("cup")){const i=+t.dataset.cup;state.water[i]=!state.water[i]}
   else {state.piggy = state.piggy===t.dataset.v ? "" : t.dataset.v}
@@ -431,7 +457,7 @@ function onClick(e){
   }
   if(scoreOf(state)===MAX&&before<MAX) confetti(innerWidth/2,innerHeight/3,200);
 }
-function onInput(e){const f=e.target.dataset.f;if(!f) return;state[f]=e.target.value;save();paint()}
+function onInput(e){const f=e.target.dataset.f;if(!f||state.saved) return;state[f]=e.target.value;save();paint()}
 function save(){store.set(keyFor(current),state)}
 
 function paint(){
@@ -458,6 +484,7 @@ function paint(){
   document.getElementById("meter").style.width=(sc/MAX*100)+"%";
   const pill=document.getElementById("pill"),ps=document.getElementById("pillScore");
   if(ps.textContent!==String(sc)){ps.textContent=sc;pill.classList.remove("bump");void pill.offsetWidth;pill.classList.add("bump")}
+  paintLock();
   document.getElementById("scoreMsg").textContent =
     sc===MAX?"Perfect day! ★": sc>=60?"Nearly a perfect day": sc>=39?"Over halfway there": sc>0?"Great start":"Today’s score";
 
@@ -469,6 +496,15 @@ function paint(){
   if(ys==null){bEl.textContent=""}
   else if(sc>ys){bEl.textContent=`Better by ${sc-ys}! Mission done ✓`;bEl.className="win"}
   else {bEl.textContent=`${ys-sc+1} more to beat it`}
+}
+function paintLock(){
+  const locked=!!state.saved;
+  document.getElementById("dayView").classList.toggle("locked",locked);
+  saveBtn.hidden=locked;editBtn.hidden=!locked;
+  const note=document.getElementById("savedNote");note.hidden=!locked;
+  if(locked) note.textContent="✓ Saved "+new Date(state.saved).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+  document.getElementById("family").readOnly=locked;document.getElementById("proud").readOnly=locked;
+  resetBtn.disabled=locked;
 }
 function mark(id,on){const el=document.getElementById(id);el.textContent=on?"+1 ✓":"+1";el.classList.toggle("got",on)}
 
@@ -486,6 +522,23 @@ resetBtn.addEventListener("click",()=>{
   if(!resetBtn.classList.contains("arm")){resetBtn.classList.add("arm");resetBtn.textContent="Tap again to clear";return}
   store.del(keyFor(current));setDay(current);
 });
+/* ---------- save the day (locks it) / hold to edit ---------- */
+const saveBtn=document.getElementById("saveDay"),editBtn=document.getElementById("editDay");
+saveBtn.addEventListener("click",()=>{
+  state.saved=Date.now();save();paint();
+  const r=saveBtn.getBoundingClientRect();confetti(r.left+r.width/2,r.bottom,120);
+});
+let holdTimer=0;
+function endHold(){clearTimeout(holdTimer);editBtn.classList.remove("holding")}
+editBtn.addEventListener("pointerdown",e=>{
+  e.preventDefault();editBtn.classList.add("holding");
+  holdTimer=setTimeout(()=>{endHold();state.saved=null;save();paint()},1500);
+});
+["pointerup","pointerleave","pointercancel"].forEach(ev=>editBtn.addEventListener(ev,endHold));
+editBtn.addEventListener("contextmenu",e=>e.preventDefault());
+editBtn.addEventListener("click",e=>{if(e.detail===0){state.saved=null;save();paint()}}); // keyboard Enter/Space
+function nudgeEdit(){editBtn.classList.remove("nudge");void editBtn.offsetWidth;editBtn.classList.add("nudge")}
+
 document.getElementById("prevDay").onclick=()=>{const d=new Date(current);d.setDate(d.getDate()-1);setDay(d)};
 document.getElementById("nextDay").onclick=()=>{const d=new Date(current);d.setDate(d.getDate()+1);if(d<=today)setDay(d)};
 
@@ -521,6 +574,7 @@ function renderWeek(){
         <span class="glass" aria-hidden="true"><span style="height:${(sc||0)/MAX*100}%"></span></span>
         <span class="dscore">${sc==null?"—":sc}<small>out of ${MAX}</small></span>
       </button>
+      ${store.get(keyFor(d))?.saved?'<span class="dsaved">✓ Saved</span>':""}
       <button type="button" class="dcomplete" id="done-${i}" data-done="${i}" aria-pressed="${!!wk.complete[i]}" ${future?"disabled":""}><span class="box">${CHECK}</span>Day complete</button>
     </div>`);
   });
@@ -555,6 +609,7 @@ function showView(v){
   const week=v==="week";
   document.getElementById("weekView").hidden=!week;
   document.getElementById("dayView").hidden=week;
+  document.getElementById("dayBtns").hidden=week;
   document.getElementById("tab-week").setAttribute("aria-selected",week);
   document.getElementById("tab-day").setAttribute("aria-selected",!week);
   if(week){weekStart=mondayOf(current);renderWeek()}
