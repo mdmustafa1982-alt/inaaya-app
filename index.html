@@ -121,6 +121,17 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4vw,44px);lin
 h1 .name{color:var(--dawn)}
 .mission{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;background:var(--noon-tint);color:var(--noon);border:2px dashed var(--noon);border-radius:999px;padding:6px 16px;font-family:var(--display);font-weight:600;font-size:16px}
 .mission b{color:var(--ink)}
+.modebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.modeseg{display:inline-flex;gap:3px;padding:3px;background:var(--paper);border:2px solid var(--line);border-radius:12px}
+.modeseg button{font-family:var(--display);font-weight:600;font-size:14px;border:0;background:none;color:var(--ink-2);padding:5px 14px;border-radius:9px;cursor:pointer}
+.modeseg button[aria-pressed="true"][data-mode="school"]{background:var(--day);color:var(--check-ink)}
+.modeseg button[aria-pressed="true"][data-mode="home"]{background:var(--noon);color:var(--check-ink)}
+.modeseg button:disabled{cursor:default}
+.modeseg button:focus-visible{outline:3px solid var(--day);outline-offset:2px}
+.modehint{font-size:12.5px;font-weight:700;color:var(--ink-2)}
+.dmode{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:2px 8px;margin-top:-2px}
+.dmode.school{background:var(--day-tint);color:var(--day)}
+.dmode.home{background:var(--noon-tint);color:var(--noon)}
 
 .scorecard{background:var(--gold-tint);border:2px solid var(--gold);border-radius:20px;padding:14px 20px;min-width:300px;display:grid;grid-template-columns:auto 1fr;gap:6px 18px;align-items:center}
 .score-num{font-family:var(--display);font-weight:700;font-size:56px;line-height:.9;color:var(--gold-ink);font-variant-numeric:tabular-nums;grid-row:span 2}
@@ -268,6 +279,7 @@ footer{margin-top:18px;display:flex;justify-content:space-between;align-items:ce
   .wrap{max-width:none;padding:0}
   .top{grid-template-columns:1fr auto;margin-bottom:6px;gap:10px}
   h1{font-size:24px}.mission{font-size:11px;padding:3px 10px}
+  .modeseg button:not([aria-pressed="true"]),.modehint{display:none}.modeseg{border-width:1px;padding:1px}.modeseg button{font-size:10px;padding:1px 8px}
   .daynav button,.vs,.reset,.band{display:none}
   .scorecard{min-width:0;padding:6px 12px;border-radius:12px}
   .score-num{font-size:32px}.score-num small{font-size:14px}
@@ -328,7 +340,7 @@ footer{margin-top:18px;display:flex;justify-content:space-between;align-items:ce
         <button type="button" class="savebtn" id="saveDay">Save my day</button>
         <button type="button" class="editbtn" id="editDay" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>Edit</button>
       </div>
-      <span class="pill" id="pill" aria-hidden="true">★ <span id="pillScore">0</span><small> / 78</small></span>
+      <span class="pill" id="pill" aria-hidden="true">★ <span id="pillScore">0</span><small> / 100</small></span>
     </div>
   </div>
 </div>
@@ -345,7 +357,7 @@ footer{margin-top:18px;display:flex;justify-content:space-between;align-items:ce
           <span id="weekLabel">Week of</span>
         </div>
         <h1><span class="name">Inaaya’s</span> Weekly Scorecard</h1>
-        <p class="week-sub">7 days · 78 points a day · 546 points possible · Try your best every day</p>
+        <p class="week-sub">7 days · 100 points a day · 700 points possible · Try your best every day</p>
       </div>
     </header>
     <div class="week" id="week"></div>
@@ -369,9 +381,16 @@ footer{margin-top:18px;display:flex;justify-content:space-between;align-items:ce
       </div>
       <h1><span class="name">Inaaya’s</span> Daily Routine Scoreboard</h1>
       <div class="mission">Today’s mission <b>I will be better than yesterday!</b></div>
+      <div class="modebar">
+        <div class="modeseg" id="modeSeg" role="group" aria-label="Type of day">
+          <button type="button" id="mode-school" data-mode="school" aria-pressed="true">School day</button>
+          <button type="button" id="mode-home" data-mode="home" aria-pressed="false">Home day</button>
+        </div>
+        <span class="modehint" id="modeHint"></span>
+      </div>
     </div>
     <div class="scorecard" aria-live="polite">
-      <div class="score-num"><span id="score">0</span><small> / 78</small></div>
+      <div class="score-num"><span id="score">0</span><small> / 100</small></div>
       <div class="score-label" id="scoreMsg">Today’s score</div>
       <div class="meter" aria-hidden="true"><span id="meter"></span></div>
       <div class="vs"><span id="yesterday">Yesterday: —</span><span id="beat"></span></div>
@@ -381,37 +400,97 @@ footer{margin-top:18px;display:flex;justify-content:space-between;align-items:ce
   <main class="grid" id="grid"></main>
 
   <footer>
-    <span>Tick each task as it’s done · 1 point each · 78 points is a perfect day · Be kind, learn, help and have fun!</span>
+    <span>Tick each task as it’s done · 1 point each · 100 points is a perfect day · Weekends and school holidays use the Home day routine · Be kind, learn, help and have fun!</span>
     <button type="button" class="reset" id="reset">Clear this day</button>
   </footer>
   </section>
 </div>
 
 <script>
-const SECTIONS = [
-  {band:"Morning"},
-  {id:"wake",t:"Morning Routine",time:"6:30",tone:"dawn",items:["Morning prayer","Wake up","Toilet","Wash face","Brush teeth","Get dressed"]},
-  {id:"walk",t:"Morning Walk",time:"7:00",tone:"dawn",items:["Put on shoes","Walk / exercise","Fresh air"]},
-  {id:"bfast",t:"Breakfast",time:"7:30",tone:"dawn",items:["Sit at table","Eat breakfast","Drink water","Good manners"]},
-  {id:"ready",t:"Get Ready for School",time:"7:45",tone:"dawn",items:["Uniform on","Hair ready","Shoes on","Bag ready","Water bottle"]},
-  {band:"School & midday"},
-  {id:"school",t:"School / Learning",time:"8:00",tone:"day",note:"Weekdays: school · Weekends: learning & activity",items:["Listen & learn","Reading / practice","Drink water","Snack / breakfast","Share & take turns","Be kind & try my best"]},
-  {id:"home",t:"Return Home",time:"12:45",tone:"day",items:["Greet family","Unpack bag","Prepare for bath"]},
-  {id:"bath",t:"Bath Time",time:"1:00",tone:"day",items:["Take off clothes","Rinse body","Shampoo & body wash","Scrub & rinse","Dry & fresh clothes"]},
-  {id:"lunch",t:"Lunch",time:"1:30",tone:"day",items:["Wash hands","Eat lunch","Drink water","Tidy up"]},
-  {band:"Afternoon & evening"},
-  {id:"rest",t:"Afternoon Rest",time:"2:00",tone:"noon",items:["Comfy clothes","Quiet rest / nap","Wake calmly"]},
-  {id:"study",t:"Study Time",time:"3:00",tone:"noon",items:["Books ready","Sit & focus","Finish homework","Ask for help","Pack away"]},
-  {id:"dinner",t:"Dinner",time:"7:00",tone:"dusk",items:["Wash hands","Eat dinner","Drink water","Family time"]},
-  {id:"sleep",t:"Sleep & Gratitude",time:"8:00",tone:"dusk",items:["Night clothes","Toilet","Brush teeth","Story / cuddle","Think of 1 thing I’m grateful for","Lights out"]},
-  {band:"All day long"},
-  {id:"kind",t:"Kindness & Good Behaviour",time:"All day",tone:"all",items:["Be respectful to Aunties","Listen to my teachers","Speak kindly to my parents"]},
-  {id:"life",t:"Life, Home & Fun",time:"All day",tone:"all",items:["10 min TV / phone time","Help with one home task","Tidy my toys / things"]},
-  {id:"food",t:"Healthy Food Choice",time:"All day",tone:"all",items:["No junk food today","Did I take seeds?","Did I take nuts?"]},
-  {special:true}
-];
+/* Two routines, each worth exactly 100 points (1 per tick, + 15 on the water card).
+   Cards and tasks with the same id/text in both plans keep their ticks when the day type is switched. */
+const SHARED = {
+  bfast:{id:"bfast",t:"Breakfast",tone:"dawn",items:["Sit at table","Eat breakfast","Drink water","Good manners","Clear my plate"]},
+  bath:{id:"bath",t:"Bath Time",tone:"day",items:["Take off clothes","Rinse body","Shampoo & body wash","Scrub & rinse","Dry & fresh clothes","Hang up my towel"]},
+  lunch:{id:"lunch",t:"Lunch",tone:"day",items:["Wash hands","Eat lunch","Drink water","Clear my plate","Tidy up"]},
+  dinner:{id:"dinner",t:"Dinner",time:"7:00",tone:"dusk",items:["Wash hands","Eat dinner","Drink water","Family time","Help clear the table"]},
+  food:{id:"food",t:"Healthy Food Choice",time:"All day",tone:"all",items:["No junk food today","Did I take seeds?","Did I take nuts?","Eat a fruit","Eat my vegetables"]}
+};
+const PLANS = {
+  school:[
+    {band:"Morning"},
+    {id:"wake",t:"Morning Routine",time:"6:30",tone:"dawn",items:["Morning prayer","Wake up","Toilet","Wash face","Brush teeth","Get dressed","Make my bed"]},
+    {id:"walk",t:"Morning Walk",time:"7:00",tone:"dawn",items:["Put on shoes","Walk / exercise","Stretch","Fresh air"]},
+    {...SHARED.bfast,time:"7:30"},
+    {id:"ready",t:"Get Ready for School",time:"7:45",tone:"dawn",items:["Uniform on","Hair ready","Shoes on","Bag ready","Water bottle","Lunchbox packed"]},
+    {band:"School & midday"},
+    {id:"school",t:"School / Learning",time:"8:00",tone:"day",items:["Listen & learn","Reading / practice","Drink water","Snack / breakfast","Share & take turns","Be kind & try my best"]},
+    {id:"home",t:"Return Home",time:"12:45",tone:"day",items:["Greet family","Wash hands","Shoes & bag away","Unpack bag","Lunchbox to kitchen","Prepare for bath"]},
+    {...SHARED.bath,time:"1:00"},
+    {...SHARED.lunch,time:"1:30"},
+    {band:"Afternoon"},
+    {id:"rest",t:"Afternoon Rest",time:"2:00",tone:"noon",items:["Comfy clothes","Quiet rest / nap","Wake calmly","Healthy snack"]},
+    {id:"study",t:"Study Time",time:"3:00",tone:"noon",items:["Books ready","Sit & focus","Finish homework","Read for 10 minutes","Ask for help","Pack away"]},
+    {id:"play",t:"Play Time",time:"4:30",tone:"noon",items:["Play outside / active play","Share & take turns","Drink water","Tidy up after play"]},
+    {band:"Evening"},
+    SHARED.dinner,
+    {id:"sleep",t:"Sleep & Gratitude",time:"8:00",tone:"dusk",items:["Night clothes","Toilet","Brush teeth","Bag ready for tomorrow","Story / cuddle","Think of 1 thing I’m grateful for","Lights out"]},
+    {band:"All day long"},
+    {id:"kind",t:"Kindness & Good Behaviour",time:"All day",tone:"all",items:["Be respectful to Aunties","Listen to my teachers","Speak kindly to my parents","Say please & thank you","Help someone today"]},
+    {id:"life",t:"Life, Home & Fun",time:"All day",tone:"all",items:["10 min TV / phone time","Screen off when asked","Help with one home task","Tidy my toys / things"]},
+    SHARED.food,
+    {special:true}
+  ],
+  home:[
+    {band:"Morning"},
+    {id:"wake",t:"Morning Routine",time:"7:30",tone:"dawn",items:["Morning prayer","Wake up","Toilet","Wash face","Brush teeth","Get dressed","Make my bed","Open the curtains"]},
+    {id:"walk",t:"Morning Exercise",time:"8:00",tone:"dawn",items:["Put on shoes","Walk / exercise","Stretch","Fresh air"]},
+    {...SHARED.bfast,time:"8:30"},
+    {id:"learn",t:"Learning Time",time:"9:30",tone:"dawn",items:["Read for 15 minutes","Maths practice","Writing practice","Spelling words","Learn something new","Drink water","Pack away books"]},
+    {band:"Late morning & midday"},
+    {id:"helper",t:"Home Helper",time:"10:30",tone:"day",items:["Tidy my room","Put clean clothes away","Help wash up","Water the plants","Help set the table","Sort my shoes"]},
+    {...SHARED.bath,time:"11:30"},
+    {...SHARED.lunch,time:"1:00"},
+    {id:"rest",t:"Quiet Time",time:"2:00",tone:"day",items:["Comfy clothes","Quiet rest / nap","Wake calmly","Healthy snack"]},
+    {band:"Afternoon"},
+    {id:"outdoor",t:"Outdoor & Play",time:"3:30",tone:"noon",items:["Play outside / park","Active game","Wear hat / sun cream","Share & take turns","Drink water","Tidy up after play"]},
+    {id:"create",t:"Creative Time",time:"5:00",tone:"noon",items:["Draw, craft or build","Music or dance","Show my family what I made","Tidy up after"]},
+    {id:"family",t:"Family Time",time:"6:00",tone:"noon",items:["Help prepare dinner","Play a family game","Talk about my day","Hug my family"]},
+    {band:"Evening"},
+    SHARED.dinner,
+    {id:"sleep",t:"Sleep & Gratitude",time:"8:30",tone:"dusk",items:["Night clothes","Toilet","Brush teeth","Clothes ready for tomorrow","Story / cuddle","Think of 1 thing I’m grateful for","Lights out"]},
+    {band:"All day long"},
+    {id:"kind",t:"Kindness & Good Behaviour",time:"All day",tone:"all",items:["Be respectful to Aunties","Speak kindly to my parents","Say please & thank you","Help someone today","Share with others"]},
+    {id:"life",t:"Life, Home & Fun",time:"All day",tone:"all",items:["Screen time (30 min max)","Screen off when asked","Tidy my toys / things","Call or visit family"]},
+    SHARED.food,
+    {special:true}
+  ]
+};
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
+const taskKey = (sid,text) => sid+":"+slug(text);
+const PLAN_KEYS = {};
+for(const m in PLANS) PLAN_KEYS[m]=new Set(PLANS[m].filter(s=>s.items).flatMap(s=>s.items.map(t=>taskKey(s.id,t))));
 
-const MAX = 78;
+// Days ticked before this update stored "card-index" keys; translate them to the new task keys.
+const V1 = {wake:["Morning prayer","Wake up","Toilet","Wash face","Brush teeth","Get dressed"],walk:["Put on shoes","Walk / exercise","Fresh air"],
+  bfast:["Sit at table","Eat breakfast","Drink water","Good manners"],ready:["Uniform on","Hair ready","Shoes on","Bag ready","Water bottle"],
+  school:["Listen & learn","Reading / practice","Drink water","Snack / breakfast","Share & take turns","Be kind & try my best"],
+  home:["Greet family","Unpack bag","Prepare for bath"],bath:["Take off clothes","Rinse body","Shampoo & body wash","Scrub & rinse","Dry & fresh clothes"],
+  lunch:["Wash hands","Eat lunch","Drink water","Tidy up"],rest:["Comfy clothes","Quiet rest / nap","Wake calmly"],
+  study:["Books ready","Sit & focus","Finish homework","Ask for help","Pack away"],dinner:["Wash hands","Eat dinner","Drink water","Family time"],
+  sleep:["Night clothes","Toilet","Brush teeth","Story / cuddle","Think of 1 thing I’m grateful for","Lights out"],
+  kind:["Be respectful to Aunties","Listen to my teachers","Speak kindly to my parents"],life:["10 min TV / phone time","Help with one home task","Tidy my toys / things"],
+  food:["No junk food today","Did I take seeds?","Did I take nuts?"]};
+function migrate(checks){
+  const out={};
+  for(const [k,v] of Object.entries(checks||{})){
+    const m=k.match(/^([a-z]+)-(\d+)$/);
+    if(m&&V1[m[1]]&&V1[m[1]][+m[2]]) out[taskKey(m[1],V1[m[1]][+m[2]])]=v; else out[k]=v;
+  }
+  return out;
+}
+
+const MAX = 100;
 const CHECK = '<svg viewBox="0 0 16 16" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3.2 3L13 4.5"/></svg>';
 
 const store = {
@@ -425,30 +504,34 @@ let current = new Date(today);
 let state;
 
 function blank(){return {checks:{},water:[],family:"",piggy:"",proud:"",saved:null}}
-function load(d){return Object.assign(blank(), store.get(keyFor(d)) || {})}
-function scoreOf(s){
+function load(d){const s=Object.assign(blank(), store.get(keyFor(d)) || {});s.checks=migrate(s.checks);return s}
+const isWeekend = d => d.getDay()===0||d.getDay()===6;
+const defaultMode = d => isWeekend(d)?"home":"school";
+const modeOf = (s,d) => (s&&s.mode)||defaultMode(d);
+function scoreOf(s,d){
   if(!s) return null;
-  return Object.values(s.checks).filter(Boolean).length + s.water.filter(Boolean).length
+  const keys=PLAN_KEYS[modeOf(s,d)];
+  return Object.entries(s.checks).filter(([k,v])=>v&&keys.has(k)).length + s.water.filter(Boolean).length
     + (s.family.trim()?1:0) + (s.piggy==="yes"?1:0) + (s.proud.trim()?1:0);
 }
 
-function render(){
+let renderedMode="";
+function render(mode){
+  renderedMode=mode;
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
-  for(const s of SECTIONS){
+  for(const s of PLANS[mode]){
     if(s.band){const b=document.createElement("div");b.className="band";b.textContent=s.band;grid.appendChild(b);continue}
     if(s.special){grid.appendChild(specialCard());continue}
     const card=document.createElement("section");
     card.className="card";card.dataset.tone=s.tone;card.dataset.id=s.id;
     card.innerHTML=`<div class="card-head"><h2>${s.t}</h2><span class="time">${s.time}</span></div>
       ${s.note?`<div class="note">${s.note}</div>`:""}
-      <ul class="tasks">${s.items.map((it,i)=>`<li><button type="button" class="task" id="t-${s.id}-${i}" data-k="${s.id}-${i}" aria-pressed="false"><span class="box">${CHECK}</span><span class="label">${it}</span></button></li>`).join("")}</ul>
+      <ul class="tasks">${s.items.map((it,i)=>`<li><button type="button" class="task" id="t-${s.id}-${i}" data-k="${taskKey(s.id,it)}" aria-pressed="false"><span class="box">${CHECK}</span><span class="label">${it}</span></button></li>`).join("")}</ul>
       <div class="progress"><span class="dots">${s.items.map(()=>"<i></i>").join("")}</span><span class="count"></span></div>
       <span class="stamp">+${s.items.length} done!</span>`;
     grid.appendChild(card);
   }
-  grid.addEventListener("click",onClick);
-  grid.addEventListener("input",onInput);
 }
 
 function specialCard(){
@@ -479,18 +562,20 @@ function onClick(e){
   if(t.classList.contains("task")){state.checks[t.dataset.k]=!state.checks[t.dataset.k]}
   else if(t.classList.contains("cup")){const i=+t.dataset.cup;state.water[i]=!state.water[i]}
   else {state.piggy = state.piggy===t.dataset.v ? "" : t.dataset.v}
-  const card=t.closest(".card"),was=card.classList.contains("complete"),before=scoreOf(state);
+  const card=t.closest(".card"),was=card.classList.contains("complete"),before=scoreOf(state,current);
   save();paint();
+  const after=scoreOf(state,current);
   if(!was&&card.classList.contains("complete")){
     const r=card.getBoundingClientRect();
-    confetti(r.left+r.width/2,r.top+r.height/2,scoreOf(state)===MAX?160:60);
+    confetti(r.left+r.width/2,r.top+r.height/2,after===MAX?160:60);
   }
-  if(scoreOf(state)===MAX&&before<MAX) confetti(innerWidth/2,innerHeight/3,200);
+  if(after===MAX&&before<MAX) confetti(innerWidth/2,innerHeight/3,200);
 }
 function onInput(e){const f=e.target.dataset.f;if(!f||state.saved) return;state[f]=e.target.value;save();paint()}
 function save(){store.set(keyFor(current),state)}
 
 function paint(){
+  paintMode();
   for(const card of document.querySelectorAll(".card:not(.special)")){
     const btns=[...card.querySelectorAll(".task")];
     let n=0;
@@ -509,19 +594,19 @@ function paint(){
   const extra=(state.family.trim()?1:0)+(state.piggy==="yes"?1:0)+(state.proud.trim()?1:0);
   document.querySelector(".card.special").classList.toggle("complete",w===12&&extra===3);
 
-  const sc=scoreOf(state);
+  const sc=scoreOf(state,current);
   document.getElementById("score").textContent=sc;
   document.getElementById("meter").style.width=(sc/MAX*100)+"%";
   const pill=document.getElementById("pill"),ps=document.getElementById("pillScore");
   if(ps.textContent!==String(sc)){ps.textContent=sc;pill.classList.remove("bump");void pill.offsetWidth;pill.classList.add("bump")}
   paintLock();
   document.getElementById("scoreMsg").textContent =
-    sc===MAX?"Perfect day! ★": sc>=60?"Nearly a perfect day": sc>=39?"Over halfway there": sc>0?"Great start":"Today’s score";
+    sc===MAX?"Perfect day! ★": sc>=80?"Nearly a perfect day": sc>=50?"Over halfway there": sc>0?"Great start":"Today’s score";
 
   const y=new Date(current);y.setDate(y.getDate()-1);
-  const ys=scoreOf(store.get(keyFor(y))&&load(y));
+  const ys=store.get(keyFor(y))?scoreOf(load(y),y):null;
   const yEl=document.getElementById("yesterday"),bEl=document.getElementById("beat");
-  yEl.textContent = ys==null ? "Yesterday: not recorded" : `Yesterday: ${ys} / 78`;
+  yEl.textContent = ys==null ? "Yesterday: not recorded" : `Yesterday: ${ys} / ${MAX}`;
   bEl.className="";
   if(ys==null){bEl.textContent=""}
   else if(sc>ys){bEl.textContent=`Better by ${sc-ys}! Mission done ✓`;bEl.className="win"}
@@ -535,8 +620,24 @@ function paintLock(){
   if(locked) note.textContent="✓ Saved "+new Date(state.saved).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
   document.getElementById("family").readOnly=locked;document.getElementById("proud").readOnly=locked;
   resetBtn.disabled=locked;
+  document.querySelectorAll("#modeSeg button").forEach(b=>b.disabled=locked);
 }
 function mark(id,on){const el=document.getElementById(id);el.textContent=on?"+1 ✓":"+1";el.classList.toggle("got",on)}
+
+function paintMode(){
+  const mode=modeOf(state,current);
+  if(mode!==renderedMode) render(mode);
+  document.querySelectorAll("#modeSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===mode));
+  document.getElementById("modeHint").textContent=
+    mode==="home" ? (isWeekend(current)?"Weekend routine":"School holiday routine") : (isWeekend(current)?"School on a weekend":"School day routine");
+}
+document.getElementById("modeSeg").addEventListener("click",e=>{
+  const b=e.target.closest("[data-mode]");if(!b) return;
+  if(state.saved){nudgeEdit();return}
+  const m=b.dataset.mode;
+  if(m===defaultMode(current)) delete state.mode; else state.mode=m;
+  save();paint();
+});
 
 function setDay(d){
   current=d;state=load(d);
@@ -652,7 +753,7 @@ const weekKey=m=>"inaaya-week:"+m.toISOString().slice(0,10);
 let weekStart=mondayOf(today), wk;
 function loadWeek(m){return Object.assign({complete:{},rating:"",proud:"",reward:"",note:""},store.get(weekKey(m))||{})}
 function saveWeek(){store.set(weekKey(weekStart),wk)}
-function dayScore(d){return store.get(keyFor(d))?scoreOf(load(d)):null}
+function dayScore(d){return store.get(keyFor(d))?scoreOf(load(d),d):null}
 function suggestRating(avg){return avg==null?"":avg>=.9*MAX?"Excellent":avg>=.75*MAX?"Very good":avg>=.5*MAX?"Good":"Keep trying"}
 
 function renderWeek(){
@@ -668,8 +769,10 @@ function renderWeek(){
     const sc=dayScore(d), future=d>today, isToday=d.toDateString()===today.toDateString();
     if(sc!=null){total+=sc;recorded++;if(!best||sc>best.sc)best={name,sc}}
     if(wk.complete[i])done++;
-    tiles.push(`<div class="daytile${i>4?" weekend":""}${isToday?" is-today":""}${future?" future":""}">
+    const mode=modeOf(store.get(keyFor(d)),d);
+    tiles.push(`<div class="daytile${mode==="home"?" weekend":""}${isToday?" is-today":""}${future?" future":""}">
       <div class="dname">${name}</div><div class="ddate">${isToday?"Today":fmt(d)}</div>
+      <span class="dmode ${mode}">${mode==="home"?(isWeekend(d)?"Home day":"Holiday"):"School"}</span>
       <button type="button" class="dopen" id="open-${i}" data-open="${i}" ${future?"disabled":""} aria-label="Open ${name} scoreboard">
         <span class="dlabel">Daily score</span>
         <span class="glass" aria-hidden="true"><span style="height:${(sc||0)/MAX*100}%"></span></span>
@@ -763,7 +866,9 @@ if("serviceWorker" in navigator){
 }
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
 
-render();
+const gridEl=document.getElementById("grid");
+gridEl.addEventListener("click",onClick);
+gridEl.addEventListener("input",onInput);
 setDay(current);
 if(location.hash==="#week") showView("week");
 </script>
