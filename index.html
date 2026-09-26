@@ -121,14 +121,16 @@ h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4vw,44px);lin
 h1 .name{color:var(--dawn)}
 .mission{display:inline-flex;align-items:center;gap:10px;align-self:flex-start;background:var(--noon-tint);color:var(--noon);border:2px dashed var(--noon);border-radius:999px;padding:6px 16px;font-family:var(--display);font-weight:600;font-size:16px}
 .mission b{color:var(--ink)}
-.modebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.modeseg{display:inline-flex;gap:3px;padding:3px;background:var(--paper);border:2px solid var(--line);border-radius:12px}
-.modeseg button{font-family:var(--display);font-weight:600;font-size:14px;border:0;background:none;color:var(--ink-2);padding:5px 14px;border-radius:9px;cursor:pointer}
-.modeseg button[aria-pressed="true"][data-mode="school"]{background:var(--day);color:var(--check-ink)}
-.modeseg button[aria-pressed="true"][data-mode="home"]{background:var(--noon);color:var(--check-ink)}
-.modeseg button:disabled{cursor:default}
-.modeseg button:focus-visible{outline:3px solid var(--day);outline-offset:2px}
-.modehint{font-size:12.5px;font-weight:700;color:var(--ink-2)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.daytype{display:inline-flex}
+.daytype select{-webkit-appearance:none;appearance:none;font-family:var(--display);font-weight:600;font-size:15px;color:var(--ink);
+  border:2px solid var(--day);background:var(--day-tint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%237a80a0' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center/12px 8px;
+  border-radius:99px;padding:7px 34px 7px 14px;cursor:pointer;max-width:100%}
+.daytype select.home{border-color:var(--noon);background-color:var(--noon-tint)}
+.daytype select:disabled{opacity:.6;cursor:default}
+.daytype select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.daykind{color:var(--day)}
+.daykind.home{color:var(--noon)}
 .dmode{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:99px;padding:2px 8px;margin-top:-2px}
 .dmode.school{background:var(--day-tint);color:var(--day)}
 .dmode.home{background:var(--noon-tint);color:var(--noon)}
@@ -279,7 +281,6 @@ footer{margin-top:18px;display:flex;justify-content:space-between;align-items:ce
   .wrap{max-width:none;padding:0}
   .top{grid-template-columns:1fr auto;margin-bottom:6px;gap:10px}
   h1{font-size:24px}.mission{font-size:11px;padding:3px 10px}
-  .modeseg button:not([aria-pressed="true"]),.modehint{display:none}.modeseg{border-width:1px;padding:1px}.modeseg button{font-size:10px;padding:1px 8px}
   .daynav button,.vs,.reset,.band{display:none}
   .scorecard{min-width:0;padding:6px 12px;border-radius:12px}
   .score-num{font-size:32px}.score-num small{font-size:14px}
@@ -336,6 +337,18 @@ footer{margin-top:18px;display:flex;justify-content:space-between;align-items:ce
     </nav>
     <div class="barright">
       <div class="daybtns" id="dayBtns">
+        <label class="daytype" for="dayType"><span class="sr">Type of day</span>
+          <select id="dayType">
+            <option value="school">School day</option>
+            <optgroup label="No school (Home day routine)">
+              <option value="weekend">No school · Weekend</option>
+              <option value="holiday">No school · School holiday</option>
+              <option value="sick">No school · Sick day</option>
+              <option value="festival">No school · Festival</option>
+              <option value="other">No school · Other reason</option>
+            </optgroup>
+          </select>
+        </label>
         <span class="saved-note" id="savedNote" hidden></span>
         <button type="button" class="savebtn" id="saveDay">Save my day</button>
         <button type="button" class="editbtn" id="editDay" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>Edit</button>
@@ -381,13 +394,6 @@ footer{margin-top:18px;display:flex;justify-content:space-between;align-items:ce
       </div>
       <h1><span class="name">Inaaya’s</span> Daily Routine Scoreboard</h1>
       <div class="mission">Today’s mission <b>I will be better than yesterday!</b></div>
-      <div class="modebar">
-        <div class="modeseg" id="modeSeg" role="group" aria-label="Type of day">
-          <button type="button" id="mode-school" data-mode="school" aria-pressed="true">School day</button>
-          <button type="button" id="mode-home" data-mode="home" aria-pressed="false">Home day</button>
-        </div>
-        <span class="modehint" id="modeHint"></span>
-      </div>
     </div>
     <div class="scorecard" aria-live="polite">
       <div class="score-num"><span id="score">0</span><small> / 100</small></div>
@@ -506,8 +512,15 @@ let state;
 function blank(){return {checks:{},water:[],family:"",piggy:"",proud:"",saved:null}}
 function load(d){const s=Object.assign(blank(), store.get(keyFor(d)) || {});s.checks=migrate(s.checks);return s}
 const isWeekend = d => d.getDay()===0||d.getDay()===6;
-const defaultMode = d => isWeekend(d)?"home":"school";
-const modeOf = (s,d) => (s&&s.mode)||defaultMode(d);
+// Day type is chosen per day; any non-school type uses the Home day routine.
+const DAY_TYPES = {school:"School day",weekend:"Weekend",holiday:"School holiday",sick:"Sick day",festival:"Festival",other:"No school"};
+const defaultType = d => isWeekend(d)?"weekend":"school";
+function dayTypeOf(s,d){
+  if(s&&s.dayType) return s.dayType;
+  if(s&&s.mode) return s.mode==="school"?"school":(isWeekend(d)?"weekend":"holiday"); // days set with the earlier switch
+  return defaultType(d);
+}
+const modeOf = (s,d) => dayTypeOf(s,d)==="school"?"school":"home";
 function scoreOf(s,d){
   if(!s) return null;
   const keys=PLAN_KEYS[modeOf(s,d)];
@@ -620,22 +633,24 @@ function paintLock(){
   if(locked) note.textContent="✓ Saved "+new Date(state.saved).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
   document.getElementById("family").readOnly=locked;document.getElementById("proud").readOnly=locked;
   resetBtn.disabled=locked;
-  document.querySelectorAll("#modeSeg button").forEach(b=>b.disabled=locked);
+  document.getElementById("dayType").disabled=locked;
 }
 function mark(id,on){const el=document.getElementById(id);el.textContent=on?"+1 ✓":"+1";el.classList.toggle("got",on)}
 
 function paintMode(){
-  const mode=modeOf(state,current);
+  const type=dayTypeOf(state,current),mode=modeOf(state,current);
   if(mode!==renderedMode) render(mode);
-  document.querySelectorAll("#modeSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===mode));
-  document.getElementById("modeHint").textContent=
-    mode==="home" ? (isWeekend(current)?"Weekend routine":"School holiday routine") : (isWeekend(current)?"School on a weekend":"School day routine");
+  const sel=document.getElementById("dayType");
+  sel.value=type;sel.classList.toggle("home",mode==="home");
+  const isToday=current.toDateString()===today.toDateString();
+  document.getElementById("dateLabel").innerHTML=(isToday?"Today · ":"")+current.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})
+    +` · <span class="daykind ${mode}">${mode==="school"?"School day":DAY_TYPES[type]+" · Home day routine"}</span>`;
 }
-document.getElementById("modeSeg").addEventListener("click",e=>{
-  const b=e.target.closest("[data-mode]");if(!b) return;
-  if(state.saved){nudgeEdit();return}
-  const m=b.dataset.mode;
-  if(m===defaultMode(current)) delete state.mode; else state.mode=m;
+document.getElementById("dayType").addEventListener("change",e=>{
+  if(state.saved){paintMode();nudgeEdit();return}
+  const t=e.target.value;
+  delete state.mode;
+  if(t===defaultType(current)) delete state.dayType; else state.dayType=t;
   save();paint();
 });
 
@@ -772,7 +787,7 @@ function renderWeek(){
     const mode=modeOf(store.get(keyFor(d)),d);
     tiles.push(`<div class="daytile${mode==="home"?" weekend":""}${isToday?" is-today":""}${future?" future":""}">
       <div class="dname">${name}</div><div class="ddate">${isToday?"Today":fmt(d)}</div>
-      <span class="dmode ${mode}">${mode==="home"?(isWeekend(d)?"Home day":"Holiday"):"School"}</span>
+      <span class="dmode ${mode}">${mode==="school"?"School":DAY_TYPES[dayTypeOf(store.get(keyFor(d)),d)]}</span>
       <button type="button" class="dopen" id="open-${i}" data-open="${i}" ${future?"disabled":""} aria-label="Open ${name} scoreboard">
         <span class="dlabel">Daily score</span>
         <span class="glass" aria-hidden="true"><span style="height:${(sc||0)/MAX*100}%"></span></span>
