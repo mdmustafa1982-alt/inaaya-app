@@ -406,7 +406,7 @@ footer{margin-top:18px;display:flex;justify-content:space-between;align-items:ce
   <main class="grid" id="grid"></main>
 
   <footer>
-    <span>Tick each task as it’s done · 1 point each · 100 points is a perfect day · Weekends and school holidays use the Home day routine · Be kind, learn, help and have fun!</span>
+    <span id="footNote">Tick each task as it’s done · 1 point each · 100 points is a perfect day · Be kind, learn, help and have fun!</span>
     <button type="button" class="reset" id="reset">Clear this day</button>
   </footer>
   </section>
@@ -472,6 +472,25 @@ const PLANS = {
     {special:true}
   ]
 };
+// Sick day: a gentle, shorter routine. Every tick is worth 2, so it still adds up to 100.
+PLANS.sick = [
+  {band:"Morning"},
+  {id:"swake",t:"Gentle Morning",time:"7:30",tone:"dawn",items:["Morning prayer","Wake up slowly","Toilet","Wash face","Brush teeth","Comfy clothes on"]},
+  {id:"smeds1",t:"Morning Check-in",time:"8:00",tone:"dawn",items:["Medicine if needed, or check-in with a grown-up","Temperature check","Tell a grown-up how I feel"]},
+  {id:"sbfast",t:"Breakfast",time:"8:30",tone:"dawn",items:["Eat what I can","Drink water","Wash hands"]},
+  {band:"Rest & recover"},
+  {id:"srest",t:"Rest Time",time:"9:30",tone:"day",items:["Lie down on the sofa or bed","Quiet book or audiobook","Rest my eyes (no screens)"]},
+  {id:"squiet",t:"Quiet Activity",time:"11:00",tone:"day",items:["Colouring or drawing","Puzzle or gentle game","Listen to a story"]},
+  {id:"slunch",t:"Lunch",time:"1:00",tone:"day",items:["Eat what I can","Drink water","Wash hands"]},
+  {id:"smeds2",t:"Afternoon Rest",time:"2:00",tone:"day",items:["Medicine if needed, or check-in with a grown-up","Nap or quiet rest"]},
+  {band:"Evening"},
+  {id:"sdinner",t:"Dinner",time:"7:00",tone:"dusk",items:["Eat what I can","Drink water or soup","Wash hands"]},
+  {id:"ssleep",t:"Early Bedtime",time:"7:30",tone:"dusk",items:["Medicine if needed, or check-in with a grown-up","Brush teeth","Night clothes","Story / cuddle","Lights out early"]},
+  {band:"All day long"},
+  {id:"swell",t:"Getting Better",time:"All day",tone:"all",items:["Cough or sneeze into my elbow","Blow my nose & bin the tissue","Wash hands often","Tell a grown-up if I feel worse"]},
+  {special:true}
+];
+const PLAN_PTS = {school:1,home:1,sick:2};
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 const taskKey = (sid,text) => sid+":"+slug(text);
 const PLAN_KEYS = {};
@@ -520,13 +539,14 @@ function dayTypeOf(s,d){
   if(s&&s.mode) return s.mode==="school"?"school":(isWeekend(d)?"weekend":"holiday"); // days set with the earlier switch
   return defaultType(d);
 }
-const modeOf = (s,d) => dayTypeOf(s,d)==="school"?"school":"home";
+const modeOf = (s,d) => {const t=dayTypeOf(s,d);return t==="school"?"school":t==="sick"?"sick":"home"};
 function scoreOf(s,d){
   if(!s) return null;
-  const keys=PLAN_KEYS[modeOf(s,d)];
-  return Object.entries(s.checks).filter(([k,v])=>v&&keys.has(k)).length + s.water.filter(Boolean).length
-    + (s.family.trim()?1:0) + (s.piggy==="yes"?1:0) + (s.proud.trim()?1:0);
+  const mode=modeOf(s,d),keys=PLAN_KEYS[mode];
+  return PLAN_PTS[mode]*(Object.entries(s.checks).filter(([k,v])=>v&&keys.has(k)).length + s.water.filter(Boolean).length
+    + (s.family.trim()?1:0) + (s.piggy==="yes"?1:0) + (s.proud.trim()?1:0));
 }
+const ptsNow = () => PLAN_PTS[renderedMode]||1;
 
 let renderedMode="";
 function render(mode){
@@ -535,22 +555,22 @@ function render(mode){
   grid.innerHTML = "";
   for(const s of PLANS[mode]){
     if(s.band){const b=document.createElement("div");b.className="band";b.textContent=s.band;grid.appendChild(b);continue}
-    if(s.special){grid.appendChild(specialCard());continue}
+    if(s.special){grid.appendChild(specialCard(PLAN_PTS[mode]));continue}
     const card=document.createElement("section");
     card.className="card";card.dataset.tone=s.tone;card.dataset.id=s.id;
     card.innerHTML=`<div class="card-head"><h2>${s.t}</h2><span class="time">${s.time}</span></div>
       ${s.note?`<div class="note">${s.note}</div>`:""}
       <ul class="tasks">${s.items.map((it,i)=>`<li><button type="button" class="task" id="t-${s.id}-${i}" data-k="${taskKey(s.id,it)}" aria-pressed="false"><span class="box">${CHECK}</span><span class="label">${it}</span></button></li>`).join("")}</ul>
       <div class="progress"><span class="dots">${s.items.map(()=>"<i></i>").join("")}</span><span class="count"></span></div>
-      <span class="stamp">+${s.items.length} done!</span>`;
+      <span class="stamp">+${s.items.length*PLAN_PTS[mode]} done!</span>`;
     grid.appendChild(card);
   }
 }
 
-function specialCard(){
+function specialCard(pts){
   const c=document.createElement("section");
   c.className="card special";c.dataset.tone="aqua";c.dataset.id="water";
-  c.innerHTML=`<div class="card-head"><h2>Water · Money · Family · Proud</h2><span class="time">+15</span></div>
+  c.innerHTML=`<div class="card-head"><h2>Water · Money · Family · Proud</h2><span class="time">+${15*pts}</span></div>
     <div class="special-body">
       <div>
         <p class="sub"><span>Water champion · 12 glasses</span><span id="waterCount">0/12</span></p>
@@ -564,7 +584,7 @@ function specialCard(){
         <div class="field"><label for="proud">Proud moment <em id="proudPt">+1</em></label><input id="proud" data-f="proud" placeholder="Something I did today that I’m proud of" autocomplete="off"></div>
       </div>
     </div>
-    <span class="stamp">+15 champion!</span>`;
+    <span class="stamp">+${15*pts} champion!</span>`;
   return c;
 }
 
@@ -635,16 +655,20 @@ function paintLock(){
   resetBtn.disabled=locked;
   document.getElementById("dayType").disabled=locked;
 }
-function mark(id,on){const el=document.getElementById(id);el.textContent=on?"+1 ✓":"+1";el.classList.toggle("got",on)}
+function mark(id,on){const el=document.getElementById(id),p="+"+ptsNow();el.textContent=on?p+" ✓":p;el.classList.toggle("got",on)}
 
 function paintMode(){
   const type=dayTypeOf(state,current),mode=modeOf(state,current);
   if(mode!==renderedMode) render(mode);
   const sel=document.getElementById("dayType");
-  sel.value=type;sel.classList.toggle("home",mode==="home");
+  sel.value=type;sel.classList.toggle("home",mode!=="school");
   const isToday=current.toDateString()===today.toDateString();
+  const routine={school:"School day",home:DAY_TYPES[type]+" · Home day routine",sick:"Sick day · Rest & recover · 2 points a tick"}[mode];
   document.getElementById("dateLabel").innerHTML=(isToday?"Today · ":"")+current.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})
-    +` · <span class="daykind ${mode}">${mode==="school"?"School day":DAY_TYPES[type]+" · Home day routine"}</span>`;
+    +` · <span class="daykind ${mode==="school"?"":"home"}">${routine}</span>`;
+  document.getElementById("footNote").textContent = mode==="sick"
+    ? "Sick day: rest comes first · every tick is worth 2 points · 100 points is a perfect day · Get well soon!"
+    : "Tick each task as it’s done · 1 point each · 100 points is a perfect day · Be kind, learn, help and have fun!";
 }
 document.getElementById("dayType").addEventListener("change",e=>{
   if(state.saved){paintMode();nudgeEdit();return}
@@ -785,9 +809,9 @@ function renderWeek(){
     if(sc!=null){total+=sc;recorded++;if(!best||sc>best.sc)best={name,sc}}
     if(wk.complete[i])done++;
     const mode=modeOf(store.get(keyFor(d)),d);
-    tiles.push(`<div class="daytile${mode==="home"?" weekend":""}${isToday?" is-today":""}${future?" future":""}">
+    tiles.push(`<div class="daytile${mode!=="school"?" weekend":""}${isToday?" is-today":""}${future?" future":""}">
       <div class="dname">${name}</div><div class="ddate">${isToday?"Today":fmt(d)}</div>
-      <span class="dmode ${mode}">${mode==="school"?"School":DAY_TYPES[dayTypeOf(store.get(keyFor(d)),d)]}</span>
+      <span class="dmode ${mode==="school"?"school":"home"}">${mode==="school"?"School":DAY_TYPES[dayTypeOf(store.get(keyFor(d)),d)]}</span>
       <button type="button" class="dopen" id="open-${i}" data-open="${i}" ${future?"disabled":""} aria-label="Open ${name} scoreboard">
         <span class="dlabel">Daily score</span>
         <span class="glass" aria-hidden="true"><span style="height:${(sc||0)/MAX*100}%"></span></span>
