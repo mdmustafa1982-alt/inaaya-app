@@ -69,7 +69,22 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-
 .hello{display:flex;flex-direction:column;gap:2px;min-width:0}
 .hi{font-family:var(--display);font-weight:700;font-size:26px;line-height:1.05}
 .hi span{color:var(--dawn)}
-.today{font-weight:800;font-size:14px;color:var(--ink-2)}
+.daychip{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:15px;color:var(--ink);background:var(--paper);border:2px solid var(--line);border-radius:99px;padding:5px 12px 5px 14px;max-width:100%}
+.daychip .chev{font-size:13px}
+.daychip:disabled{opacity:.7;cursor:default}
+.daychip:disabled .chev{display:none}
+
+.finishrow{display:flex;justify-content:center;margin-top:28px}
+.finishbtn{font-family:var(--display);font-weight:700;font-size:22px;color:#fff;background:var(--dusk);border:0;border-radius:99px;padding:14px 28px;box-shadow:var(--shadow)}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.choices.two{grid-template-columns:1fr 1fr}
+.choice{display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--display);font-weight:600;font-size:16px;color:var(--ink);background:var(--bg);border:3px solid var(--line);border-radius:22px;padding:14px 6px}
+.choice span{font-size:46px;line-height:1}
+.choice[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-tint)}
+.choice.yes{border-color:var(--noon);background:var(--noon-tint)}
+.csub{font-weight:700;font-size:15px;color:var(--ink-2);margin:-8px 0 16px}
+.linkbtn{background:none;border:0;font-weight:800;font-size:15px;color:var(--ink-2);padding:6px 12px}
+#typePick .cbox,#confirmSave .cbox{max-width:440px}
 .grown{flex:none;display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:13px;color:var(--ink-2);background:var(--paper);border:2px solid var(--line);border-radius:99px;padding:6px 12px}
 .grown svg{width:14px;height:14px}
 
@@ -264,7 +279,7 @@ select#dayType:disabled{opacity:.55}
   <div class="kbar-in">
     <div class="hello">
       <div class="hi">Hi <span>Inaaya!</span></div>
-      <div class="today" id="kDay"></div>
+      <button type="button" class="daychip" id="dayChip" aria-label="Choose what kind of day it is"><span id="kDay"></span><span class="chev" aria-hidden="true">✏️</span></button>
     </div>
     <button type="button" class="grown" id="grownBtn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>Grown-ups</button>
   </div>
@@ -288,6 +303,7 @@ select#dayType:disabled{opacity:.55}
     <section class="tiles" id="tiles"></section>
     <div class="nextrow"><button type="button" class="nextbtn" id="nextBtn" hidden></button></div>
   </div>
+  <div class="finishrow"><button type="button" class="finishbtn" id="finishBtn">🌙 I’m finished for today!</button></div>
   <p class="savedmsg" id="savedMsg" hidden>All saved! See you tomorrow 🌙</p>
   <p class="legacy" id="legacyMsg" hidden></p>
 </main>
@@ -322,6 +338,32 @@ select#dayType:disabled{opacity:.55}
   </div>
 </div>
 
+<!-- kid: what kind of day is it? -->
+<div class="celebrate" id="typePick" hidden>
+  <div class="cbox" role="dialog" aria-modal="true" aria-labelledby="typeQ">
+    <p class="ctext" id="typeQ">What kind of day is it?</p>
+    <div class="choices">
+      <button type="button" class="choice" id="pick-school" data-type="school"><span>🏫</span>School day</button>
+      <button type="button" class="choice" id="pick-home" data-type="home"><span>🏠</span>Home day</button>
+      <button type="button" class="choice" id="pick-sick" data-type="sick"><span>🤒</span>Sick day</button>
+    </div>
+    <button type="button" class="linkbtn" id="typeCancel">Close</button>
+  </div>
+</div>
+
+<!-- kid: are you sure you want to save? -->
+<div class="celebrate" id="confirmSave" hidden>
+  <div class="cbox" role="alertdialog" aria-modal="true" aria-labelledby="confirmQ">
+    <div class="cemoji">🌙</div>
+    <p class="ctext" id="confirmQ">Are you sure you’re finished?</p>
+    <p class="csub">Once you save, you can’t change today.</p>
+    <div class="choices two">
+      <button type="button" class="choice yes" id="confirmYes"><span>✅</span>Yes, save it!</button>
+      <button type="button" class="choice" id="confirmNo"><span>↩️</span>Not yet</button>
+    </div>
+  </div>
+</div>
+
 <!-- grown-ups sheet -->
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
   <div class="sheet-in">
@@ -335,6 +377,7 @@ select#dayType:disabled{opacity:.55}
       <select id="dayType">
         <option value="school">🏫 School day</option>
         <optgroup label="No school">
+          <option value="home">🏠 Home day</option>
           <option value="weekend">🏠 Weekend</option>
           <option value="holiday">🏠 School holiday</option>
           <option value="festival">🏠 Festival</option>
@@ -444,7 +487,7 @@ let current = new Date(today);
 let state, part="";
 
 /* ---------- saved days ---------- */
-const DAY_TYPES = {school:"School day",weekend:"Weekend",holiday:"School holiday",sick:"Sick day",festival:"Festival",other:"No school"};
+const DAY_TYPES = {school:"School day",home:"Home day",weekend:"Weekend",holiday:"School holiday",sick:"Sick day",festival:"Festival",other:"No school"};
 const defaultType = d => isWeekend(d)?"weekend":"school";
 function dayTypeOf(s,d){
   if(s&&s.dayType) return s.dayType;
@@ -528,6 +571,8 @@ function paint(){
   $("legacyMsg").hidden=!legacy;$("steps").hidden=legacy;$("partArea").hidden=legacy;
   if(legacy) $("legacyMsg").textContent=`This day was ticked on the old chart and scored ${state.legacyScore} points.`;
   $("savedMsg").hidden=!(state.saved&&!legacy);
+  $("finishBtn").parentElement.hidden=!!state.saved||legacy;
+  $("dayChip").disabled=!!state.saved||legacy;
   $("kidView").classList.toggle("locked",!!state.saved);
 
   // score, rocket and stickers
@@ -604,6 +649,44 @@ function celebrate(emoji,text,spoken){
   $("cOk").focus();
 }
 $("cOk").addEventListener("click",()=>{$("celebrate").hidden=true;const nb=$("nextBtn");if(!nb.hidden&&partDone(partById(part))) goPart(nb.dataset.part)});
+
+/* ---------- Inaaya picks the kind of day ---------- */
+$("dayChip").addEventListener("click",()=>{
+  if(state.saved) return;
+  const m=modeOf(state,current);
+  document.querySelectorAll("#typePick .choice").forEach(b=>b.setAttribute("aria-pressed",b.dataset.type===m));
+  $("typePick").hidden=false;$("pick-"+m).focus();
+  speak("What kind of day is it? School day, home day, or sick day?");
+});
+$("typePick").addEventListener("click",e=>{
+  if(e.target.id==="typePick"||e.target.id==="typeCancel"){$("typePick").hidden=true;return}
+  const b=e.target.closest("[data-type]");if(!b) return;
+  const want=b.dataset.type;$("typePick").hidden=true;
+  if(want!==modeOf(state,current)){
+    // "Home" keeps a grown-up's more specific choice (holiday, festival…) and is simply "Weekend" on Sat/Sun
+    const keepHome=["home","weekend","holiday","festival","other"].includes(state.dayType);
+    const t=want==="home"?(isWeekend(current)?"weekend":keepHome?state.dayType:"home"):want;
+    delete state.mode;
+    if(t===defaultType(current)) delete state.dayType; else state.dayType=t;
+    save();part=pickPart();paint();
+  }
+  speak({school:"School day!",home:"Home day!",sick:"Sick day. Get well soon!"}[want]);
+});
+
+/* ---------- Inaaya saves her day, after saying yes twice ---------- */
+$("finishBtn").addEventListener("click",()=>{
+  if(state.saved) return;
+  $("confirmSave").hidden=false;$("confirmNo").focus();
+  speak("Are you sure you're finished? Once you save, you can't change today.");
+});
+$("confirmNo").addEventListener("click",()=>{$("confirmSave").hidden=true;speak("Okay! Keep going!")});
+$("confirmSave").addEventListener("click",e=>{if(e.target.id==="confirmSave")$("confirmSave").hidden=true});
+$("confirmYes").addEventListener("click",()=>{
+  $("confirmSave").hidden=true;
+  state.saved=Date.now();save();paint();
+  const sc=scoreOf(state,current);
+  celebrate("🌙",`Day saved! You got ${sc} stars today!`,`Day saved! You got ${sc} stars today. Well done, Inaaya!`);
+});
 
 /* ---------- grown-ups sheet (behind the PIN) ---------- */
 let unlockedUntil=0;
@@ -706,7 +789,7 @@ pinWrap.addEventListener("click",e=>{if(e.target===pinWrap)closePin()});
 document.addEventListener("keydown",e=>{
   if(!pinWrap.hidden){
     if(e.key==="Escape")closePin();else if(/^[0-9]$/.test(e.key))pinKey(e.key);else if(e.key==="Backspace")pinKey("back");
-  } else if(e.key==="Escape"){$("sheet").hidden=true;$("celebrate").hidden=true}
+  } else if(e.key==="Escape"){["sheet","celebrate","typePick","confirmSave"].forEach(id=>$(id).hidden=true)}
 });
 
 /* ---------- weekly scorecard ---------- */
