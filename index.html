@@ -320,6 +320,12 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 .motto{margin:18px 0 0;text-align:center;font-family:var(--display);font-weight:600;font-size:18px;text-wrap:balance}
 .motto span{color:var(--dawn)}
 
+.buddy{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);z-index:17;display:flex;align-items:flex-end;gap:8px;transform:translateX(-50%);pointer-events:none;max-width:calc(100% - 32px)}
+.buddy.in{animation:buddyin .45s cubic-bezier(.34,1.6,.64,1)}
+.buddy .be{font-size:64px;line-height:1;animation:hop .6s ease-in-out infinite alternate}
+.buddy .bb{background:var(--paper);color:var(--ink);font-family:var(--display);font-weight:600;font-size:19px;line-height:1.25;border:3px solid var(--gold);border-radius:22px 22px 22px 6px;padding:10px 16px;box-shadow:0 12px 30px -12px rgba(0,0,0,.45);max-width:320px;margin-bottom:26px}
+@keyframes buddyin{0%{transform:translate(-50%,140%)}100%{transform:translate(-50%,0)}}
+@keyframes hop{to{transform:translateY(-8px) rotate(-4deg)}}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:16;width:100%;height:100%}
 
 @media (max-width:1080px){.week{grid-template-columns:repeat(4,minmax(0,1fr))}.summary{grid-column:span 4}.notes{grid-template-columns:1fr}}
@@ -340,6 +346,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 </head>
 <body>
 <canvas id="confetti" aria-hidden="true"></canvas>
+<div class="buddy" id="buddy" hidden aria-hidden="true"><span class="be"></span><span class="bb"></span></div>
 
 <!-- kid's top bar -->
 <header class="kbar" id="kbar">
@@ -541,6 +548,7 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
         <button type="button" class="gbtn" id="testVoice">🔊 Test the voice</button>
         <button type="button" class="gbtn" id="soundBtn" aria-pressed="true">Sound effects: On</button>
         <button type="button" class="gbtn" id="voiceBtn" aria-pressed="true">Read aloud: On</button>
+        <button type="button" class="gbtn" id="cartoonBtn" aria-pressed="true">Cartoon voices: On</button>
       </div>
       <p class="gnote">For a much nicer voice on iPad or iPhone: Settings → Accessibility → Spoken Content → Voices → English, and download an “Enhanced” or “Premium” voice (Ava, Zoe or Serena are good). Then pick it above. Sounds are silent when the device is on silent.</p>
     </div>
@@ -669,7 +677,7 @@ const partDone = p => p.tasks.every(([,l])=>state.checks[taskKey(p.id,l)]);
 const partCount = p => p.tasks.filter(([,l])=>state.checks[taskKey(p.id,l)]).length;
 
 /* ---------- settings ---------- */
-const settings=Object.assign({sound:true,voice:true,voiceURI:"",sayName:"Ee-naa-ya",weekGoal:500},store.get("inaaya-settings")||{});
+const settings=Object.assign({sound:true,voice:true,cartoon:true,voiceURI:"",sayName:"Ee-naa-ya",weekGoal:500},store.get("inaaya-settings")||{});
 const saveSettings = () => store.set("inaaya-settings",settings);
 
 /* ---------- sound effects, made on the device ---------- */
@@ -702,8 +710,54 @@ const SFX = {
   fanfare(){const a=audio();if(!a)return;const t=a.currentTime;
     [[523,0],[659,.13],[784,.26],[1047,.42]].forEach(([f,d])=>{tone(f,t+d,.35,"square",.05);tone(f*2,t+d,.35,"triangle",.06)});
     [523,659,784,1047].forEach(f=>tone(f,t+.6,1.3,"triangle",.07));noise(t+.6,.9,6000,9000,.05,"highpass")},
-  bloop(){const a=audio();if(!a)return;tone(300,a.currentTime,.15,"sine",.15,620)}
+  bloop(){const a=audio();if(!a)return;tone(300,a.currentTime,.15,"sine",.15,620)},
+  // character sounds
+  squeak(){const a=audio();if(!a)return;const t=a.currentTime;tone(1400,t,.09,"sine",.14,2300);tone(1600,t+.12,.09,"sine",.14,2600)},
+  growl(){const a=audio();if(!a)return;const t=a.currentTime;tone(110,t,.45,"sawtooth",.06,80);noise(t,.45,400,200,.08,"lowpass")},
+  robot(){const a=audio();if(!a)return;const t=a.currentTime;[880,660,990,740].forEach((f,i)=>tone(f,t+i*.08,.07,"square",.05))},
+  boing(){const a=audio();if(!a)return;const t=a.currentTime;tone(180,t,.18,"sine",.2,720);tone(720,t+.18,.25,"sine",.14,260)},
+  roar(){const a=audio();if(!a)return;const t=a.currentTime;tone(160,t,.6,"sawtooth",.07,60);noise(t,.6,700,150,.12,"lowpass")},
+  harp(){const a=audio();if(!a)return;const t=a.currentTime;[523,659,784,988,1175,1397].forEach((f,i)=>tone(f,t+i*.05,.6,"triangle",.07))},
+  zap(){const a=audio();if(!a)return;const t=a.currentTime;tone(1800,t,.25,"sawtooth",.05,180);tone(2400,t+.2,.2,"sine",.06,900)},
+  ribbit(){const a=audio();if(!a)return;const t=a.currentTime;tone(280,t,.07,"square",.07,220);tone(300,t+.1,.09,"square",.07,200)}
 };
+
+/* ---------- cartoon characters who take turns cheering ---------- */
+// Built from the device's own voices: pitch and speed make the character; Apple's fun voices are used when present.
+const CHARACTERS = [
+  {e:"🐿️",n:"Squeaky Squirrel",pitch:2,rate:1.15,high:true,sfx:"squeak",hi:["Squeak squeak!","Nuts about you!","Wheee!"]},
+  {e:"🐻",n:"Big Bear",pitch:.55,rate:.82,sfx:"growl",hi:["Grrreat!","Beary good!","Big bear hug!"]},
+  {e:"🤖",n:"Robo",pitch:.8,rate:.92,sfx:"robot",novel:"Zarvox|Trinoids",hi:["Beep boop!","Super star detected!","Awesome level: one hundred!"]},
+  {e:"🦄",n:"Sparkle",pitch:1.6,rate:1,high:true,sfx:"sparkle",hi:["Sparkle sparkle!","Magical!","Rainbow power!"]},
+  {e:"🐸",n:"Froggy",pitch:1.3,rate:1.3,high:true,sfx:"ribbit",hi:["Ribbit!","Hop hop hooray!","Toad-ally awesome!"]},
+  {e:"🦖",n:"Dino",pitch:.5,rate:.9,sfx:"roar",hi:["Roooar!","Dino-mite!","Stomp stomp!"]},
+  {e:"👸",n:"Princess",pitch:1.4,rate:.95,high:true,sfx:"harp",hi:["How wonderful!","Simply splendid!","Royally brilliant!"]},
+  {e:"👽",n:"Zib",pitch:1.9,rate:1.35,high:true,sfx:"zap",novel:"Trinoids",hi:["Zip zap!","Out of this world!","Blip blop!"]}
+];
+const MALE_V=/Daniel|Aaron|Arthur|Gordon|Rishi|Alex\b|Tom\b|Oliver|Evan|Nathan|David|Mark|Guy|Ryan|George|Thomas|Male/i;
+function charVoice(c){
+  if(c.novel){const v=voices.find(v=>new RegExp(c.novel,"i").test(v.name));if(v) return {voice:v,pitch:1,rate:1}}
+  const good=voices.filter(v=>voiceRank(v)>-20);
+  let pool=settings.voiceURI?[]:good.filter(v=>c.high?!MALE_V.test(v.name):MALE_V.test(v.name));
+  const v=pool.sort((a,b)=>voiceRank(b)-voiceRank(a))[0]||pickVoice();
+  return {voice:v,pitch:c.pitch,rate:c.rate};
+}
+let lastChar=-1,buddyTimer=0;
+function cheer(text){
+  if(!settings.cartoon) return speak(text);
+  let i;do{i=Math.floor(Math.random()*CHARACTERS.length)}while(i===lastChar&&CHARACTERS.length>1);
+  lastChar=i;const c=CHARACTERS[i];
+  const line=(Math.random()<.65?c.hi[Math.floor(Math.random()*c.hi.length)]+" ":"")+text;
+  const b=$("buddy");b.querySelector(".be").textContent=c.e;b.querySelector(".bb").textContent=line.replace(/Inaaya/g,"Inaaya");
+  b.hidden=false;b.classList.remove("in");void b.offsetWidth;b.classList.add("in");
+  clearTimeout(buddyTimer);buddyTimer=setTimeout(()=>{b.hidden=true},Math.max(2600,line.length*75));
+  SFX[c.sfx]?.();
+  setTimeout(()=>speak(line,charVoice(c)),240);
+}
+const PART_SAY={"Wake up":"Time to wake up!","Breakfast":"Breakfast time!","School":"Time for school!","After school":"Home from school! Bath, lunch and rest.",
+  "Homework & play":"Homework and play time!","Learn & help":"Time to learn and help!","Midday":"It's lunchtime!","Play time":"It's play time!",
+  "Bedtime":"It's bedtime!","Morning":"Good morning!","Rest":"Time for a cosy rest!"};
+const partSay = p => PART_SAY[p.t]||p.t+"!";
 
 /* ---------- the voice ---------- */
 let voices=[];
@@ -725,13 +779,13 @@ function pickVoice(){
   if(settings.voiceURI){const v=voices.find(v=>v.voiceURI===settings.voiceURI);if(v) return v}
   return voices.slice().sort((a,b)=>voiceRank(b)-voiceRank(a))[0]||null;
 }
-function speak(text){
+function speak(text,opt={}){
   if(!settings.voice||!("speechSynthesis" in window)) return;
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text.replace(/Inaaya/g,settings.sayName||"Inaaya"));
-    const v=pickVoice();if(v){u.voice=v;u.lang=v.lang}
-    u.rate=.9;u.pitch=1.12;u.volume=1;
+    const v=opt.voice||pickVoice();if(v){u.voice=v;u.lang=v.lang}
+    u.rate=opt.rate??.9;u.pitch=opt.pitch??1.12;u.volume=1;
     speechSynthesis.speak(u);
   }catch(e){}
 }
@@ -829,18 +883,18 @@ $("tiles").addEventListener("click",e=>{
   SFX.tick();
   const finishedPart=!wasDone&&partDone(p);
   if(finishedPart){confetti(r.left+r.width/2,r.top+r.height/2,90);setTimeout(SFX.partDone,300)}
-  if(newGift){setTimeout(()=>showGift(),finishedPart?2000:1600);speak(`${task[2]}`);return}
+  if(newGift){setTimeout(()=>showGift(),finishedPart?2400:2000);cheer(`${task[2]}`);return}
   if(finishedPart){
-    speak(`${task[2]} ${p.t}, all done! Great job, Inaaya!`);
+    cheer(`${task[2]} ${p.t}, all done! Great job, Inaaya!`);
     clearTimeout(advanceTimer);
     advanceTimer=setTimeout(()=>{const nb=$("nextBtn");if(!nb.hidden&&$("giftPop").hidden) goPart(nb.dataset.part)},3200);
-  } else speak(`${task[2]} ${Math.random()<.5?PRAISE[Math.floor(Math.random()*PRAISE.length)]:""}`);
+  } else cheer(`${task[2]} ${Math.random()<.4?PRAISE[Math.floor(Math.random()*PRAISE.length)]:""}`);
 });
 function floatPts(x,y,text){const f=document.createElement("span");f.className="float";f.textContent=text;f.style.left=(x-30)+"px";f.style.top=y+"px";document.body.appendChild(f);setTimeout(()=>f.remove(),1000)}
-function goPart(id){clearTimeout(advanceTimer);part=id;paint();const p=partById(id);SFX.bloop();speak(p.t+" time!");$("steps").querySelector(`[data-part="${id}"]`)?.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});$("partArea").scrollIntoView({behavior:"smooth",block:"start"})}
+function goPart(id){clearTimeout(advanceTimer);part=id;paint();const p=partById(id);SFX.bloop();speak(partSay(p));$("steps").querySelector(`[data-part="${id}"]`)?.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});$("partArea").scrollIntoView({behavior:"smooth",block:"start"})}
 $("steps").addEventListener("click",e=>{const b=e.target.closest("[data-part]");if(b) goPart(b.dataset.part)});
 $("nextBtn").addEventListener("click",()=>goPart($("nextBtn").dataset.part));
-$("sayPart").addEventListener("click",()=>{const p=partById(part);speak(`${p.t}. ${p.tasks.map(([,l])=>l).join(". ")}.`)});
+$("sayPart").addEventListener("click",()=>{const p=partById(part);speak(`${partSay(p)} ${p.tasks.map(([,l])=>l).join(". ")}.`)});
 
 /* ---------- surprise gifts: a new sticker every 25 stars ---------- */
 function pickSticker(forceShiny){
@@ -888,7 +942,7 @@ function openGift(){
     $("giftBtn").textContent=giftIdx===3?"Perfect day!":"Yay!";$("giftBtn").disabled=false;
     giftStage="open";
     SFX.fanfare();confetti(innerWidth/2,innerHeight/2.6,g.shiny?220:140);
-    speak(`${g.shiny?"Wow! A shiny ":"It's a "}${s.n}! ${isNew?"A new sticker for your sticker book!":"Another one for your collection!"}${giftIdx===3?" And you got all 100 stars today. Perfect day, Inaaya!":""}`);
+    cheer(`${g.shiny?"Wow! A shiny ":"It's a "}${s.n}! ${isNew?"A new sticker for your sticker book!":"Another one for your collection!"}${giftIdx===3?" And you got all 100 stars today. Perfect day, Inaaya!":""}`);
     paint();g.fresh=false;
   },1150);
 }
@@ -904,9 +958,9 @@ $("gifts").addEventListener("click",e=>{
   const o=e.target.closest("[data-got]");if(o){const s=stickerById(o.dataset.got);SFX.sparkle();speak(`Your ${s.n} sticker!`)}
 });
 
-function celebrate(emoji,text,spoken){
+function celebrate(emoji,text,spoken,byChar){
   $("cEmoji").textContent=emoji;$("cText").textContent=text;$("celebrate").hidden=false;
-  confetti(innerWidth/2,innerHeight/3,160);SFX.fanfare();speak(spoken||text);
+  confetti(innerWidth/2,innerHeight/3,160);SFX.fanfare();(byChar?cheer:speak)(spoken||text);
   $("cOk").focus();
 }
 $("cOk").addEventListener("click",()=>{$("celebrate").hidden=true});
@@ -946,7 +1000,7 @@ $("confirmYes").addEventListener("click",()=>{
   $("confirmSave").hidden=true;
   state.saved=Date.now();save();paint();
   const sc=scoreOf(state,current);
-  celebrate("🌙",`Day saved! You got ${sc} stars today!`,`Day saved! You got ${sc} stars today. Well done, Inaaya! Sweet dreams!`);
+  celebrate("🌙",`Day saved! You got ${sc} stars today!`,`Day saved! You got ${sc} stars today. Well done, Inaaya! Sweet dreams!`,true);
 });
 
 /* ---------- kid pages: my day / my week / sticker book ---------- */
@@ -1033,7 +1087,7 @@ function renderBook(){
         :`<span class="bslot missing" aria-label="Not found yet">?</span>`).join("")}</div></section>`;
   }).join("");
 }
-$("themes").addEventListener("click",e=>{const b=e.target.closest("[data-st]");if(!b) return;const s=stickerById(b.dataset.st),a=album[s.id];SFX.sparkle();speak(`${a.shiny?"Shiny ":""}${s.n}!${a.n>1?` You have ${a.n} of these!`:""}`)});
+$("themes").addEventListener("click",e=>{const b=e.target.closest("[data-st]");if(!b) return;const s=stickerById(b.dataset.st),a=album[s.id];cheer(`${a.shiny?"Shiny ":""}${s.n}!${a.n>1?` You have ${a.n} of these!`:""}`)});
 
 /* ---------- grown-ups sheet (behind the PIN) ---------- */
 let unlockedUntil=0;
@@ -1053,6 +1107,7 @@ function paintGrown(){
   $("reset").disabled=!!state.saved;
   $("soundBtn").setAttribute("aria-pressed",settings.sound);$("soundBtn").textContent="Sound effects: "+(settings.sound?"On":"Off");
   $("voiceBtn").setAttribute("aria-pressed",settings.voice);$("voiceBtn").textContent="Read aloud: "+(settings.voice?"On":"Off");
+  $("cartoonBtn").setAttribute("aria-pressed",settings.cartoon);$("cartoonBtn").textContent="Cartoon voices: "+(settings.cartoon?"On":"Off");
   $("goalSel").value=String(settings.weekGoal);
   const wk=loadWeek(mondayOf(today));if(document.activeElement!==$("rewardIn")) $("rewardIn").value=wk.reward;
   if(document.activeElement!==$("nameIn")) $("nameIn").value=settings.sayName;
@@ -1066,10 +1121,11 @@ $("dayType").addEventListener("change",e=>{
 $("saveDay").addEventListener("click",()=>{state.saved=Date.now();save();paint()});
 $("unlockDay").addEventListener("click",()=>{state.saved=null;save();paint()});
 $("soundBtn").addEventListener("click",()=>{settings.sound=!settings.sound;saveSettings();paintGrown();SFX.tick()});
+$("cartoonBtn").addEventListener("click",()=>{settings.cartoon=!settings.cartoon;saveSettings();paintGrown();cheer("Cartoon voices are on!")});
 $("voiceBtn").addEventListener("click",()=>{settings.voice=!settings.voice;saveSettings();paintGrown();speak("Read aloud is on")});
 $("voiceSel").addEventListener("change",e=>{settings.voiceURI=e.target.value;saveSettings();speak("Hi Inaaya! Brush teeth. Sparkly clean teeth!")});
 $("nameIn").addEventListener("input",e=>{settings.sayName=e.target.value.trim()||"Inaaya";saveSettings()});
-$("testVoice").addEventListener("click",()=>{SFX.tick();speak("Hi Inaaya! Brush teeth. Sparkly clean teeth! You earned a surprise!")});
+$("testVoice").addEventListener("click",()=>{SFX.tick();cheer("Hi Inaaya! Sparkly clean teeth!")});
 $("goalSel").addEventListener("change",e=>{settings.weekGoal=+e.target.value;saveSettings()});
 $("rewardIn").addEventListener("input",e=>{const m=mondayOf(today),wk=loadWeek(m);wk.reward=e.target.value;store.set(weekKey(m),wk)});
 $("weekBtn").addEventListener("click",()=>{$("sheet").hidden=true;showView("week")});
@@ -1266,7 +1322,7 @@ var FIREBASE_CONFIG = {
   appId: "1:929301648426:web:b933bbc4021f1187641f53"
 };
 var SYNC_RE = /^inaaya-(routine|week|album|settings|parent-pin)/;
-var DEVICE_ONLY = ["sound","voice","voiceURI"];            // settings each device keeps for itself
+var DEVICE_ONLY = ["sound","voice","voiceURI","cartoon"];            // settings each device keeps for itself
 var sync = Object.assign({code:"",device:""}, store.get("inaaya-sync")||{});
 var syncMeta = store.get("inaaya-sync-meta")||{};             // key -> last change time
 var syncDb = null, syncUnsub = null, syncApplying = false, syncQueue = new Set(), syncTimer = 0, syncState = "off", syncLast = 0, syncErr = "";
