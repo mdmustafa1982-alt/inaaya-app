@@ -249,6 +249,10 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 .gsel:disabled{opacity:.55}
 .gnote{font-size:13px;font-weight:700;color:var(--ink-2);margin:0}
 .gnote.ok{color:var(--noon)}
+.gnote.err{color:var(--all)}
+.famcode{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-weight:700;font-size:22px;letter-spacing:.08em;background:var(--bg);border:2px dashed var(--line);border-radius:12px;padding:10px 12px;text-align:center;-webkit-user-select:all;user-select:all}
+.syncdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--line);vertical-align:middle}
+.syncdot.on{background:var(--noon)}.syncdot.wait{background:var(--gold)}.syncdot.bad{background:var(--all)}
 
 /* ---------- parent PIN keypad ---------- */
 .pinwrap{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;background:rgba(20,23,41,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
@@ -506,6 +510,27 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
       <label class="gnote" for="rewardIn">Reward when the chest opens</label>
       <input class="ginput" id="rewardIn" placeholder="e.g. Trip to the park" autocomplete="off">
     </div>
+    <div class="gblock" id="syncBlock">
+      <span class="glabel">Sync between devices</span>
+      <p class="gnote" id="syncStatus"></p>
+      <div id="syncOff">
+        <button type="button" class="gbtn primary" id="syncStart">Start syncing from this device</button>
+        <p class="gnote">Do this on the iPad first. Then on your iPhone, type the family code below and tap Join.</p>
+        <div class="grow">
+          <input class="ginput" id="syncCodeIn" placeholder="Family code, e.g. ABCD-EFGH-JKLM-NPQR" autocomplete="off" autocapitalize="characters" style="flex:1;min-width:0">
+          <button type="button" class="gbtn" id="syncJoin">Join</button>
+        </div>
+      </div>
+      <div id="syncOn" hidden>
+        <p class="gnote">Family code (type this on the other device):</p>
+        <div class="famcode" id="syncCode"></div>
+        <div class="grow">
+          <button type="button" class="gbtn" id="syncCopy">Copy code</button>
+          <button type="button" class="gbtn" id="syncNow">Sync now</button>
+          <button type="button" class="gbtn warn" id="syncStop">Stop syncing here</button>
+        </div>
+      </div>
+    </div>
     <div class="gblock">
       <span class="glabel">Voice &amp; sounds</span>
       <label class="gnote" for="voiceSel">Voice</label>
@@ -595,8 +620,8 @@ const PRAISE = ["Yay!","Well done!","Super star!","Great job!","Brilliant!","Ama
 
 const store = {
   get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},
-  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},
-  del(k){try{localStorage.removeItem(k)}catch(e){}}
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}syncTouch(k)},
+  del(k){try{localStorage.removeItem(k)}catch(e){}syncTouch(k)}
 };
 const keyFor = d => "inaaya-routine:" + d.toISOString().slice(0,10);
 const isWeekend = d => d.getDay()===0||d.getDay()===6;
@@ -604,7 +629,7 @@ const sameDay = (a,b) => a.toDateString()===b.toDateString();
 let today = new Date(); today.setHours(12,0,0,0);
 let current = new Date(today);
 let state, part="";
-const album = Object.assign({}, store.get("inaaya-album")||{});   // sticker id -> {n, shiny, first}
+let album = Object.assign({}, store.get("inaaya-album")||{});   // sticker id -> {n, shiny, first}
 const saveAlbum = () => store.set("inaaya-album",album);
 
 /* ---------- saved days ---------- */
@@ -1066,7 +1091,7 @@ async function hashPin(p){
   catch(e){return "plain:"+p}
 }
 const getPin=()=>{try{return localStorage.getItem(PIN_KEY)}catch(e){return null}};
-const setPin=h=>{try{localStorage.setItem(PIN_KEY,h)}catch(e){}};
+const setPin=h=>{try{localStorage.setItem(PIN_KEY,h)}catch(e){}syncTouch(PIN_KEY)};
 const pin={mode:"",buf:"",first:"",answer:"",then:null,lastFocus:null};
 const pinWrap=$("pinWrap"),pinMsg=$("pinMsg"),pinShow=$("pinShow");
 const MSGS={
@@ -1229,8 +1254,134 @@ if("serviceWorker" in navigator){
 }
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
 
+/* ---------- sync between family devices (Firebase) ---------- */
+// Paste the Firebase web-app config here to switch sync on. Security comes from the Firestore rules
+// (signed-in devices only) plus the long, secret family code.
+var FIREBASE_CONFIG = null;
+var SYNC_RE = /^inaaya-(routine|week|album|settings|parent-pin)/;
+var DEVICE_ONLY = ["sound","voice","voiceURI"];            // settings each device keeps for itself
+var sync = Object.assign({code:"",device:""}, store.get("inaaya-sync")||{});
+var syncMeta = store.get("inaaya-sync-meta")||{};             // key -> last change time
+var syncDb = null, syncUnsub = null, syncApplying = false, syncQueue = new Set(), syncTimer = 0, syncState = "off", syncLast = 0, syncErr = "";
+if(!sync.device){sync.device=Math.random().toString(36).slice(2,10);try{localStorage.setItem("inaaya-sync",JSON.stringify(sync))}catch(e){}}
+function syncTouch(k){
+  if(!SYNC_RE||!syncMeta||syncApplying||!SYNC_RE.test(k)) return;   // not set up yet during start-up
+  syncMeta[k]=Date.now();
+  try{localStorage.setItem("inaaya-sync-meta",JSON.stringify(syncMeta))}catch(e){}
+  if(!sync.code) return;
+  syncQueue.add(k);clearTimeout(syncTimer);syncTimer=setTimeout(syncFlush,400);
+}
+function syncItems(){return syncDb.collection("families").doc(sync.code).collection("items")}
+function syncFlush(){
+  if(!syncDb||!sync.code) return;
+  const keys=[...syncQueue];syncQueue.clear();
+  const batch=syncDb.batch();
+  for(const k of keys){
+    let v=null;try{v=localStorage.getItem(k)}catch(e){}
+    batch.set(syncItems().doc(k),{v,t:syncMeta[k]||Date.now(),by:sync.device});
+  }
+  batch.commit().then(()=>{syncLast=Date.now();syncState="on";paintSync()}).catch(e=>{keys.forEach(k=>syncQueue.add(k));syncErr=e.message;paintSync()});
+}
+function loadScript(src){return new Promise((ok,bad)=>{const s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=()=>bad(new Error("Couldn’t load "+src));document.head.appendChild(s)})}
+async function syncConnect(){
+  if(!FIREBASE_CONFIG||!sync.code) return;
+  syncState="wait";syncErr="";paintSync();
+  try{
+    if(!window.firebase){
+      const v="10.12.2";
+      await loadScript(`https://www.gstatic.com/firebasejs/${v}/firebase-app-compat.js`);
+      await loadScript(`https://www.gstatic.com/firebasejs/${v}/firebase-auth-compat.js`);
+      await loadScript(`https://www.gstatic.com/firebasejs/${v}/firebase-firestore-compat.js`);
+    }
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    if(!syncDb){syncDb=firebase.firestore();try{await syncDb.enablePersistence({synchronizeTabs:true})}catch(e){}}
+    if(!firebase.auth().currentUser) await firebase.auth().signInAnonymously();
+    if(syncUnsub) syncUnsub();
+    let first=true;
+    syncUnsub=syncItems().onSnapshot({includeMetadataChanges:false},snap=>{
+      const changed=new Set(),remote={};
+      snap.docChanges().forEach(ch=>{
+        const k=ch.doc.id,d=ch.doc.data();remote[k]=d.t;
+        if(d.t>(syncMeta[k]||0)&&!(d.by===sync.device&&d.t===syncMeta[k])){syncApply(k,d.v);syncMeta[k]=d.t;changed.add(k)}
+      });
+      if(first){
+        // first contact: send up anything this device has that the family copy doesn't (or has older)
+        first=false;
+        const have=new Set(snap.docs.map(x=>x.id));
+        for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(SYNC_RE.test(k)&&(!have.has(k)||(syncMeta[k]||0)>(remote[k]||0))){syncMeta[k]=syncMeta[k]||1;syncQueue.add(k)}}
+        if(syncQueue.size) syncFlush();
+      }
+      try{localStorage.setItem("inaaya-sync-meta",JSON.stringify(syncMeta))}catch(e){}
+      syncLast=Date.now();syncState="on";syncErr="";paintSync();
+      if(changed.size) syncRefresh(changed);
+    },e=>{syncState="bad";syncErr=e.message;paintSync()});
+  }catch(e){syncState="bad";syncErr=e.message||String(e);paintSync()}
+}
+function syncApply(k,v){
+  syncApplying=true;
+  try{
+    if(v==null) localStorage.removeItem(k);
+    else if(k==="inaaya-settings"){
+      const mine=store.get(k)||{},theirs=JSON.parse(v);DEVICE_ONLY.forEach(f=>{if(f in mine) theirs[f]=mine[f]});
+      localStorage.setItem(k,JSON.stringify(theirs));
+    } else localStorage.setItem(k,v);
+  }catch(e){}
+  syncApplying=false;
+}
+function syncRefresh(changed){
+  if(changed.has("inaaya-album")) album=Object.assign({},store.get("inaaya-album")||{});
+  if(changed.has("inaaya-settings")) Object.assign(settings,store.get("inaaya-settings")||{});
+  const busy=!$("giftPop").hidden||!$("confirmSave").hidden;
+  if(changed.has(keyFor(current))&&!busy){const keep=part;state=load(current);part=keep;paint()}
+  else paintBadge();
+  refreshKid();
+  if(!$("weekView").hidden) renderWeek();
+  if(!$("sheet").hidden) paintGrown();
+}
+const CODE_ABC="ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const fmtCode=c=>c.replace(/(.{4})(?=.)/g,"$1-");
+function newCode(){const a=new Uint32Array(16);crypto.getRandomValues(a);return [...a].map(n=>CODE_ABC[n%CODE_ABC.length]).join("")}
+function paintSync(){
+  const on=!!sync.code,st=$("syncStatus");
+  $("syncOff").hidden=on;$("syncOn").hidden=!on;
+  $("syncCode").textContent=on?fmtCode(sync.code):"";
+  const ready=!!FIREBASE_CONFIG;
+  $("syncStart").disabled=$("syncJoin").disabled=!ready;
+  let dot="",msg="";
+  if(!ready){dot="";msg="Not connected to the online database yet."}
+  else if(!on){msg="This device keeps its own copy. Start or join to share with the family."}
+  else if(syncState==="bad"){dot="bad";msg="Sync problem: "+syncErr}
+  else if(!navigator.onLine){dot="wait";msg="Offline. Changes will sync when back online."}
+  else if(syncState==="on"){dot="on";msg="Synced ✓ "+(Date.now()-syncLast<60e3?"just now":"at "+new Date(syncLast).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}))}
+  else {dot="wait";msg="Connecting…"}
+  st.className="gnote"+(syncState==="bad"&&on?" err":"");
+  st.innerHTML=(dot?`<span class="syncdot ${dot}"></span>`:"")+msg;
+}
+function saveSync(){try{localStorage.setItem("inaaya-sync",JSON.stringify(sync))}catch(e){}}
+$("syncStart").addEventListener("click",()=>{sync.code=newCode();saveSync();paintSync();syncConnect()});
+$("syncJoin").addEventListener("click",async()=>{
+  const c=$("syncCodeIn").value.toUpperCase().replace(/[^A-Z0-9]/g,"");
+  if(c.length!==16){$("syncStatus").className="gnote err";$("syncStatus").textContent="That code should have 16 letters and numbers. Check it and try again.";return}
+  sync.code=c;saveSync();paintSync();await syncConnect();
+});
+$("syncCopy").addEventListener("click",e=>{
+  const t=fmtCode(sync.code);
+  navigator.clipboard?.writeText(t).then(()=>{e.target.textContent="Copied ✓";setTimeout(()=>e.target.textContent="Copy code",1500)}).catch(()=>{});
+});
+$("syncNow").addEventListener("click",()=>{if(syncDb){for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(SYNC_RE.test(k))syncQueue.add(k)}syncFlush()}else syncConnect()});
+$("syncStop").addEventListener("click",e=>{
+  if(!e.target.classList.contains("arm")){e.target.classList.add("arm");e.target.textContent="Tap again to stop";return}
+  e.target.classList.remove("arm");e.target.textContent="Stop syncing here";
+  if(syncUnsub) syncUnsub();syncUnsub=null;sync.code="";saveSync();syncState="off";paintSync();
+});
+addEventListener("online",()=>{paintSync();if(sync.code&&syncState!=="on") syncConnect()});
+addEventListener("offline",paintSync);
+setInterval(()=>{if(!$("sheet").hidden) paintSync()},15000);
+
 loadVoices();
 setDay(current);
+paintSync();
+if(sync.code) syncConnect();
 </script>
 </body>
 </html>
