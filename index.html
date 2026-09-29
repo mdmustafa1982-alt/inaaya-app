@@ -59,37 +59,31 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font
   padding:0 env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
   -webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
 button{font:inherit;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:pointer}
-button:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.wrap{max-width:1100px;margin:0 auto;padding:16px 20px 40px}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1100px;margin:0 auto;padding:14px 20px 40px}
 
-/* ---------- kid top bar ---------- */
+/* ---------- kid top bar + kid tabs ---------- */
 .kbar{position:sticky;top:0;z-index:5;background:var(--bg);background:color-mix(in srgb,var(--bg) 90%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
   padding:calc(env(safe-area-inset-top,0px) + 10px) 20px 10px}
-.kbar-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.hello{display:flex;flex-direction:column;gap:2px;min-width:0}
+.kbar-in{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.hello{display:flex;flex-direction:column;gap:4px;min-width:0}
 .hi{font-family:var(--display);font-weight:700;font-size:26px;line-height:1.05}
 .hi span{color:var(--dawn)}
 .daychip{align-self:flex-start;display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:15px;color:var(--ink);background:var(--paper);border:2px solid var(--line);border-radius:99px;padding:5px 12px 5px 14px;max-width:100%}
 .daychip .chev{font-size:13px}
 .daychip:disabled{opacity:.7;cursor:default}
 .daychip:disabled .chev{display:none}
-
-.finishrow{display:flex;justify-content:center;margin-top:28px}
-.finishbtn{font-family:var(--display);font-weight:700;font-size:22px;color:#fff;background:var(--dusk);border:0;border-radius:99px;padding:14px 28px;box-shadow:var(--shadow)}
-.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
-.choices.two{grid-template-columns:1fr 1fr}
-.choice{display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--display);font-weight:600;font-size:16px;color:var(--ink);background:var(--bg);border:3px solid var(--line);border-radius:22px;padding:14px 6px}
-.choice span{font-size:46px;line-height:1}
-.choice[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-tint)}
-.choice.yes{border-color:var(--noon);background:var(--noon-tint)}
-.csub{font-weight:700;font-size:15px;color:var(--ink-2);margin:-8px 0 16px}
-.linkbtn{background:none;border:0;font-weight:800;font-size:15px;color:var(--ink-2);padding:6px 12px}
-#typePick .cbox,#confirmSave .cbox{max-width:440px}
+.barright{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.knav{display:flex;gap:6px;background:var(--paper);border:2px solid var(--line);border-radius:18px;padding:4px}
+.knav button{display:flex;align-items:center;gap:6px;font-family:var(--display);font-weight:600;font-size:16px;border:0;background:none;color:var(--ink-2);border-radius:14px;padding:7px 12px}
+.knav button span{font-size:22px;line-height:1}
+.knav button[aria-selected="true"]{background:var(--gold-tint);color:var(--ink);box-shadow:inset 0 0 0 2px var(--gold)}
+.knav .badge{font-family:var(--body);font-size:11px;font-weight:800;background:var(--all);color:#fff;border-radius:99px;padding:1px 6px}
 .grown{flex:none;display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:13px;color:var(--ink-2);background:var(--paper);border:2px solid var(--line);border-radius:99px;padding:6px 12px}
 .grown svg{width:14px;height:14px}
 
-/* ---------- hero: score, rocket, stickers ---------- */
-.hero{background:var(--paper);border:2px solid var(--line);border-radius:28px;padding:16px 20px;box-shadow:var(--shadow);display:grid;grid-template-columns:auto 1fr;gap:10px 22px;align-items:center}
+/* ---------- hero: score, rocket, surprise gifts ---------- */
+.hero{background:var(--paper);border:2px solid var(--line);border-radius:28px;padding:16px 20px;box-shadow:var(--shadow);display:grid;grid-template-columns:auto 1fr;gap:12px 22px;align-items:center}
 .scorebig{font-family:var(--display);font-weight:700;font-size:64px;line-height:.9;color:var(--gold-ink);font-variant-numeric:tabular-nums;grid-row:span 2;text-align:center}
 .scorebig small{display:block;font-size:18px;color:var(--ink-2);font-weight:600;margin-top:4px}
 .scorebig.bump{animation:bump .45s ease}
@@ -99,13 +93,19 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-
 .planet,.goal,.rocket{position:absolute;top:50%;transform:translateY(-50%);font-size:34px;line-height:1}
 .planet{left:8px}.goal{right:8px}
 .rocket{left:calc(48px + (100% - 134px) * var(--p,0));transition:left .6s cubic-bezier(.34,1.4,.64,1)}
-.stickers{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.slot{width:52px;height:52px;border-radius:16px;display:grid;place-items:center;font-size:32px;background:var(--bg);border:2px dashed var(--line);color:var(--ink-2);position:relative}
+.giftrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.giftrow-label{font-weight:800;font-size:13px;color:var(--ink-2)}
+.slot{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;font-size:34px;background:var(--bg);border:2px dashed var(--line);color:var(--ink-2);position:relative;padding:0}
 .slot small{position:absolute;bottom:-9px;font-size:10px;font-weight:800;background:var(--paper);border-radius:6px;padding:0 4px;color:var(--ink-2)}
-.slot.got{border:2px solid var(--gold);background:var(--gold-tint);animation:pop .5s ease}
-.slot:not(.got) span{filter:grayscale(1);opacity:.25}
+.slot.locked span{font-family:var(--display);font-size:24px;font-weight:700;opacity:.35}
+.slot.gift{border:2px solid var(--all);background:var(--all-tint);animation:wiggle 1.2s ease-in-out infinite}
+.slot.got{border:2px solid var(--gold);background:var(--gold-tint)}
+.slot.got.fresh{animation:pop .5s ease}
+@keyframes wiggle{0%,60%,100%{transform:rotate(0)}70%{transform:rotate(-10deg)}80%{transform:rotate(10deg)}90%{transform:rotate(-6deg)}}
 @keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
-.stickers-label{font-weight:800;font-size:13px;color:var(--ink-2)}
+.shiny{position:relative}
+.shiny::after{content:"✨";position:absolute;top:-8px;right:-8px;font-size:18px;animation:twinkle 1.6s ease-in-out infinite}
+@keyframes twinkle{50%{transform:scale(.6) rotate(20deg);opacity:.6}}
 
 /* ---------- parts of the day ---------- */
 .steps{display:flex;gap:10px;overflow-x:auto;padding:16px 2px 10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -148,26 +148,87 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-
 .tsay{position:absolute;top:8px;right:8px;width:40px;height:40px;border-radius:50%;border:0;background:var(--bg);font-size:18px;display:grid;place-items:center;color:var(--ink)}
 .locked .tile{cursor:default}
 .locked .tile:active{transform:none}
-
 .float{position:fixed;z-index:9;pointer-events:none;font-family:var(--display);font-weight:700;font-size:28px;color:var(--gold-ink);text-shadow:0 2px 0 var(--paper);animation:floatup 1s ease-out forwards}
 @keyframes floatup{to{transform:translateY(-90px);opacity:0}}
-
-.nextrow{display:flex;justify-content:center;margin-top:18px}
+.nextrow,.finishrow{display:flex;justify-content:center;margin-top:18px}
+.finishrow{margin-top:28px}
 .nextbtn{font-family:var(--display);font-weight:700;font-size:22px;color:var(--check-ink);background:var(--noon);border:0;border-radius:99px;padding:14px 28px;box-shadow:var(--shadow);animation:pulse 1.6s ease-in-out infinite}
 @keyframes pulse{50%{transform:scale(1.05)}}
+.finishbtn{font-family:var(--display);font-weight:700;font-size:22px;color:#fff;background:var(--dusk);border:0;border-radius:99px;padding:14px 28px;box-shadow:var(--shadow)}
 .savedmsg,.legacy{text-align:center;font-family:var(--display);font-weight:600;font-size:22px;margin:22px 0 0;color:var(--dusk)}
 .legacy{font-size:18px;color:var(--ink-2)}
 
-/* ---------- celebration pop-up ---------- */
-.celebrate{position:fixed;inset:0;z-index:15;display:grid;place-items:center;padding:20px;background:rgba(20,23,41,.45)}
-.cbox{background:var(--paper);border-radius:32px;padding:26px 30px;text-align:center;max-width:360px;width:100%;box-shadow:0 24px 60px -20px rgba(0,0,0,.5);animation:pop .45s ease}
+/* ---------- kid: my week ---------- */
+.kw-hero{background:var(--paper);border:2px solid var(--line);border-radius:28px;padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+.kw-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.kw-title{font-family:var(--display);font-weight:700;font-size:30px;margin:0}
+.kw-stars{font-family:var(--display);font-weight:700;font-size:44px;color:var(--gold-ink);line-height:1;font-variant-numeric:tabular-nums}
+.kw-stars small{font-size:18px;color:var(--ink-2);font-weight:600}
+.chesttrack{position:relative;height:66px;border-radius:99px;background:var(--dusk-tint);border:2px solid var(--dusk);overflow:hidden}
+.chestfill{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,var(--dusk),var(--all));opacity:.35;transition:width .8s ease}
+.walker,.chest{position:absolute;top:50%;transform:translateY(-50%);font-size:38px;line-height:1}
+.chest{right:10px}
+.walker{left:calc(10px + (100% - 110px) * var(--p,0));transition:left .8s cubic-bezier(.34,1.4,.64,1)}
+.chest.open{animation:bump .6s ease 2}
+.kw-msg{font-family:var(--display);font-weight:600;font-size:21px;margin:0;text-wrap:balance}
+.kw-meta{display:flex;gap:10px;flex-wrap:wrap}
+.chip{font-weight:800;font-size:14px;border-radius:99px;padding:6px 12px;background:var(--bg);border:2px solid var(--line)}
+.chip.fire{background:var(--dawn-tint);border-color:var(--dawn);color:var(--ink)}
+.chip.win{background:var(--noon-tint);border-color:var(--noon)}
+.reward{display:flex;align-items:center;gap:14px;background:var(--gold-tint);border:2px solid var(--gold);border-radius:22px;padding:12px 16px}
+.reward .re{font-size:44px;line-height:1}
+.reward b{display:block;font-family:var(--display);font-weight:600;font-size:14px;color:var(--gold-ink);text-transform:uppercase;letter-spacing:.06em}
+.reward span.rt{font-family:var(--display);font-weight:700;font-size:22px}
+.bubbles{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-top:16px}
+.bubble{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--paper);border:2px solid var(--line);border-radius:22px;padding:10px 4px;box-shadow:var(--shadow)}
+.bubble.today{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-tint)}
+.bubble.future{opacity:.5}
+.bubble .bd{font-family:var(--display);font-weight:600;font-size:16px}
+.bubble .bf{font-size:38px;line-height:1.1}
+.bubble .bs{font-family:var(--display);font-weight:700;font-size:18px;color:var(--gold-ink);font-variant-numeric:tabular-nums}
+.bubble .bk{font-size:14px;min-height:18px;letter-spacing:1px;text-align:center}
+
+/* ---------- kid: sticker book ---------- */
+.book-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.book-count{font-family:var(--display);font-weight:700;font-size:22px;color:var(--dusk)}
+.bookbar{height:14px;border-radius:99px;background:var(--dusk-tint);overflow:hidden;margin:6px 0 14px}
+.bookbar span{display:block;height:100%;background:var(--dusk);border-radius:99px}
+.theme{background:var(--paper);border:2px solid var(--line);border-radius:24px;padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.theme h3{font-family:var(--display);font-weight:600;font-size:20px;margin:0 0 10px;display:flex;justify-content:space-between;gap:10px}
+.theme h3 small{font-family:var(--body);font-size:13px;font-weight:800;color:var(--ink-2)}
+.bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:10px}
+.bslot{aspect-ratio:1;max-width:100%;border-radius:18px;display:grid;place-items:center;font-size:40px;background:var(--bg);border:2px dashed var(--line);padding:0;color:var(--ink-2)}
+.bslot.missing{font-family:var(--display);font-size:26px;font-weight:700;color:var(--line)}
+.bslot.have{border:2px solid var(--gold);background:var(--gold-tint)}
+.bslot .cnt{position:absolute;bottom:2px;right:6px;font-size:11px;font-weight:800;color:var(--gold-ink);font-family:var(--body)}
+.bslot{position:relative}
+
+/* ---------- pop-ups ---------- */
+.celebrate{position:fixed;inset:0;z-index:15;display:grid;place-items:center;padding:20px;background:rgba(20,23,41,.5)}
+.cbox{background:var(--paper);border-radius:32px;padding:26px 28px;text-align:center;max-width:380px;width:100%;box-shadow:0 24px 60px -20px rgba(0,0,0,.5);animation:pop .45s ease}
+#typePick .cbox,#confirmSave .cbox{max-width:440px}
 .cemoji{font-size:96px;line-height:1.1}
-.ctext{font-family:var(--display);font-weight:700;font-size:26px;margin:8px 0 16px;text-wrap:balance}
+.ctext{font-family:var(--display);font-weight:700;font-size:26px;margin:8px 0 12px;text-wrap:balance}
+.csub{font-weight:700;font-size:15px;color:var(--ink-2);margin:-4px 0 16px}
 .cok{font-family:var(--display);font-weight:700;font-size:22px;border:0;border-radius:99px;background:var(--gold);color:#3A2600;padding:12px 34px}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.choices.two{grid-template-columns:1fr 1fr}
+.choice{display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--display);font-weight:600;font-size:16px;color:var(--ink);background:var(--bg);border:3px solid var(--line);border-radius:22px;padding:14px 6px}
+.choice span{font-size:46px;line-height:1}
+.choice[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-tint)}
+.choice.yes{border-color:var(--noon);background:var(--noon-tint)}
+.linkbtn{background:none;border:0;font-weight:800;font-size:15px;color:var(--ink-2);padding:6px 12px}
+.giftbig{font-size:120px;line-height:1.1;display:inline-block}
+.giftbig.shake{animation:shake .12s linear infinite}
+.giftbig.reveal{animation:reveal .7s cubic-bezier(.34,1.6,.64,1)}
+.giftbig.shiny{filter:drop-shadow(0 0 14px var(--gold))}
+@keyframes shake{0%{transform:rotate(-8deg) scale(1.02)}50%{transform:rotate(8deg) scale(1.06)}100%{transform:rotate(-8deg) scale(1.02)}}
+@keyframes reveal{0%{transform:scale(.1) rotate(-200deg)}100%{transform:scale(1) rotate(0)}}
+.newtag{display:inline-block;font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#fff;background:var(--all);border-radius:99px;padding:3px 10px;margin-bottom:8px}
 
 /* ---------- grown-ups sheet ---------- */
 .sheet{position:fixed;inset:0;z-index:12;display:flex;justify-content:flex-end;background:rgba(20,23,41,.45)}
-.sheet-in{background:var(--paper);width:min(420px,100%);height:100%;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 18px) 20px calc(env(safe-area-inset-bottom,0px) + 24px);display:flex;flex-direction:column;gap:16px;box-shadow:-20px 0 50px -20px rgba(0,0,0,.4)}
+.sheet-in{background:var(--paper);width:min(430px,100%);height:100%;overflow-y:auto;padding:calc(env(safe-area-inset-top,0px) + 18px) 20px calc(env(safe-area-inset-bottom,0px) + 24px);display:flex;flex-direction:column;gap:16px;box-shadow:-20px 0 50px -20px rgba(0,0,0,.4)}
 .sheet-head{display:flex;justify-content:space-between;align-items:center}
 .sheet-head h2{font-family:var(--display);font-weight:600;font-size:24px;margin:0}
 .gblock{display:flex;flex-direction:column;gap:8px;padding-bottom:14px;border-bottom:1px solid var(--line)}
@@ -183,9 +244,9 @@ button:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-
 .daynav button{width:40px;height:40px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font-size:20px;line-height:1}
 .daynav button:disabled{opacity:.35;cursor:default}
 .gdate{font-family:var(--display);font-weight:600;font-size:18px}
-select#dayType{-webkit-appearance:none;appearance:none;width:100%;font-family:var(--display);font-weight:600;font-size:17px;color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:10px 38px 10px 12px;
-  background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%237a80a0' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center/12px 8px}
-select#dayType:disabled{opacity:.55}
+.gsel,.ginput{-webkit-appearance:none;appearance:none;width:100%;font-family:var(--display);font-weight:600;font-size:17px;color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--bg)}
+.gsel{padding-right:38px;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%237a80a0' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center/12px 8px}
+.gsel:disabled{opacity:.55}
 .gnote{font-size:13px;font-weight:700;color:var(--ink-2);margin:0}
 .gnote.ok{color:var(--noon)}
 
@@ -207,7 +268,7 @@ select#dayType:disabled{opacity:.55}
 .pinlinks{display:flex;justify-content:space-between;gap:10px}
 .pinlinks button{font-weight:800;font-size:13px;background:none;border:0;color:var(--dusk);padding:6px 4px}
 
-/* ---------- weekly view (grown-ups) ---------- */
+/* ---------- weekly scorecard (grown-ups) ---------- */
 .wtop{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
 .wtop h1{font-family:var(--display);font-weight:700;font-size:clamp(26px,4vw,38px);margin:0}
 .wtop h1 span{color:var(--dawn)}
@@ -255,18 +316,20 @@ select#dayType:disabled{opacity:.55}
 .motto{margin:18px 0 0;text-align:center;font-family:var(--display);font-weight:600;font-size:18px;text-wrap:balance}
 .motto span{color:var(--dawn)}
 
-#confetti{position:fixed;inset:0;pointer-events:none;z-index:14;width:100%;height:100%}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:16;width:100%;height:100%}
 
 @media (max-width:1080px){.week{grid-template-columns:repeat(4,minmax(0,1fr))}.summary{grid-column:span 4}.notes{grid-template-columns:1fr}}
+@media (max-width:760px){.bubbles{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (max-width:640px){
   .wrap{padding:12px 16px 32px}.kbar{padding-left:16px;padding-right:16px}
   .hero{grid-template-columns:1fr;text-align:center}
   .scorebig{grid-row:auto;font-size:56px}.scorebig small{display:inline;margin-left:4px}
-  .stickers{justify-content:center}
+  .giftrow{justify-content:center}
   .tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   .tile{min-height:150px}.temoji{font-size:54px}.tlabel{font-size:18px}
   .week{grid-template-columns:repeat(2,minmax(0,1fr))}.summary{grid-column:span 2}
   .hi{font-size:22px}
+  .knav{width:100%;justify-content:space-between}.knav button{font-size:14px;padding:7px 8px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -281,20 +344,25 @@ select#dayType:disabled{opacity:.55}
       <div class="hi">Hi <span>Inaaya!</span></div>
       <button type="button" class="daychip" id="dayChip" aria-label="Choose what kind of day it is"><span id="kDay"></span><span class="chev" aria-hidden="true">✏️</span></button>
     </div>
-    <button type="button" class="grown" id="grownBtn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>Grown-ups</button>
+    <div class="barright">
+      <nav class="knav" role="tablist" aria-label="Inaaya's pages">
+        <button type="button" role="tab" id="nav-day" data-view="day" aria-selected="true"><span>☀️</span>My day</button>
+        <button type="button" role="tab" id="nav-week" data-view="kweek" aria-selected="false"><span>🧰</span>My week</button>
+        <button type="button" role="tab" id="nav-book" data-view="book" aria-selected="false"><span>📒</span>Stickers</button>
+      </nav>
+      <button type="button" class="grown" id="grownBtn"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="2"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>Grown-ups</button>
+    </div>
   </div>
 </header>
 
-<!-- kid's day -->
+<!-- kid: my day -->
 <main class="wrap" id="kidView">
   <section class="hero" aria-live="polite">
     <div class="scorebig" id="scoreBig"><span id="kScore">0</span><small>/ 100 ⭐</small></div>
     <div class="track" aria-hidden="true"><span class="trail" id="trail"></span><span class="planet">🌍</span><span class="rocket" id="rocket">🚀</span><span class="goal">🏆</span></div>
-    <div class="stickers"><span class="stickers-label">My stickers</span><span class="stickers" id="stickers"></span></div>
+    <div class="giftrow"><span class="giftrow-label">Surprises</span><span class="giftrow" id="gifts"></span></div>
   </section>
-
   <nav class="steps" id="steps" role="tablist" aria-label="Parts of my day"></nav>
-
   <div id="partArea">
     <div class="parthead">
       <h2 id="partTitle"></h2>
@@ -306,6 +374,32 @@ select#dayType:disabled{opacity:.55}
   <div class="finishrow"><button type="button" class="finishbtn" id="finishBtn">🌙 I’m finished for today!</button></div>
   <p class="savedmsg" id="savedMsg" hidden>All saved! See you tomorrow 🌙</p>
   <p class="legacy" id="legacyMsg" hidden></p>
+</main>
+
+<!-- kid: my week -->
+<main class="wrap" id="kidWeek" hidden>
+  <section class="kw-hero">
+    <div class="kw-top">
+      <h2 class="kw-title">My week</h2>
+      <div class="kw-stars"><span id="kwStars">0</span> <small>⭐ of <span id="kwGoal">500</span></small></div>
+      <button type="button" class="say" id="sayWeek" aria-label="Hear my week">🔊</button>
+    </div>
+    <div class="chesttrack" aria-hidden="true"><span class="chestfill" id="chestFill"></span><span class="walker" id="walker">🧒</span><span class="chest" id="chest">🧰</span></div>
+    <p class="kw-msg" id="kwMsg"></p>
+    <div class="kw-meta" id="kwMeta"></div>
+    <div class="reward"><span class="re" id="rewardE">🎁</span><div><b id="rewardLabel">Treasure chest reward</b><span class="rt" id="rewardText"></span></div></div>
+  </section>
+  <div class="bubbles" id="bubbles"></div>
+</main>
+
+<!-- kid: sticker book -->
+<main class="wrap" id="kidBook" hidden>
+  <div class="book-top">
+    <h2 class="kw-title">My sticker book</h2>
+    <span class="book-count" id="bookCount"></span>
+  </div>
+  <div class="bookbar"><span id="bookBar"></span></div>
+  <div id="themes"></div>
 </main>
 
 <!-- weekly scorecard (grown-ups) -->
@@ -323,13 +417,13 @@ select#dayType:disabled{opacity:.55}
   <div class="week" id="week"></div>
   <div class="notes">
     <div class="notecard" data-tone="dawn"><h3>This week I am proud of</h3><label for="wk-proud">Something I did well:</label><textarea id="wk-proud" data-w="proud"></textarea></div>
-    <div class="notecard" data-tone="all"><h3>My family reward</h3><label for="wk-reward">A small reward for effort &amp; consistency:</label><textarea id="wk-reward" data-w="reward"></textarea></div>
+    <div class="notecard" data-tone="all"><h3>My family reward</h3><label for="wk-reward">Treasure chest reward (Inaaya sees this):</label><textarea id="wk-reward" data-w="reward"></textarea></div>
     <div class="notecard" data-tone="dusk"><h3>Parent note</h3><label for="wk-note">One thing we noticed:</label><textarea id="wk-note" data-w="note"></textarea></div>
   </div>
   <p class="motto">I don’t need a perfect week — <span>I just need to try, learn &amp; keep going.</span></p>
 </main>
 
-<!-- celebration pop-up -->
+<!-- pop-ups -->
 <div class="celebrate" id="celebrate" hidden>
   <div class="cbox" role="alertdialog" aria-labelledby="cText">
     <div class="cemoji" id="cEmoji"></div>
@@ -337,8 +431,15 @@ select#dayType:disabled{opacity:.55}
     <button type="button" class="cok" id="cOk">Yay!</button>
   </div>
 </div>
-
-<!-- kid: what kind of day is it? -->
+<div class="celebrate" id="giftPop" hidden>
+  <div class="cbox" role="alertdialog" aria-labelledby="giftText">
+    <span class="newtag" id="giftNew" hidden>New sticker!</span>
+    <div><span class="giftbig" id="giftBig">🎁</span></div>
+    <p class="ctext" id="giftText">You earned a surprise!</p>
+    <p class="csub" id="giftSub"></p>
+    <button type="button" class="cok" id="giftBtn">Open it!</button>
+  </div>
+</div>
 <div class="celebrate" id="typePick" hidden>
   <div class="cbox" role="dialog" aria-modal="true" aria-labelledby="typeQ">
     <p class="ctext" id="typeQ">What kind of day is it?</p>
@@ -350,8 +451,6 @@ select#dayType:disabled{opacity:.55}
     <button type="button" class="linkbtn" id="typeCancel">Close</button>
   </div>
 </div>
-
-<!-- kid: are you sure you want to save? -->
 <div class="celebrate" id="confirmSave" hidden>
   <div class="cbox" role="alertdialog" aria-modal="true" aria-labelledby="confirmQ">
     <div class="cemoji">🌙</div>
@@ -374,7 +473,7 @@ select#dayType:disabled{opacity:.55}
     </div>
     <div class="gblock">
       <label class="glabel" for="dayType">Type of day</label>
-      <select id="dayType">
+      <select class="gsel" id="dayType">
         <option value="school">🏫 School day</option>
         <optgroup label="No school">
           <option value="home">🏠 Home day</option>
@@ -392,15 +491,33 @@ select#dayType:disabled{opacity:.55}
         <button type="button" class="gbtn primary" id="saveDay">Save &amp; lock the day</button>
         <button type="button" class="gbtn" id="unlockDay" hidden>Unlock to change</button>
       </div>
-      <p class="gnote" id="savedNote">Locking stops any more ticks until you unlock it here.</p>
+      <p class="gnote" id="savedNote"></p>
     </div>
     <div class="gblock">
-      <span class="glabel">Sounds</span>
+      <span class="glabel">This week’s treasure chest</span>
+      <label class="gnote" for="goalSel">Weekly star goal</label>
+      <select class="gsel" id="goalSel">
+        <option value="350">350 stars (about 50 a day)</option>
+        <option value="420">420 stars (about 60 a day)</option>
+        <option value="500">500 stars (about 70 a day)</option>
+        <option value="560">560 stars (about 80 a day)</option>
+        <option value="630">630 stars (about 90 a day)</option>
+      </select>
+      <label class="gnote" for="rewardIn">Reward when the chest opens</label>
+      <input class="ginput" id="rewardIn" placeholder="e.g. Trip to the park" autocomplete="off">
+    </div>
+    <div class="gblock">
+      <span class="glabel">Voice &amp; sounds</span>
+      <label class="gnote" for="voiceSel">Voice</label>
+      <select class="gsel" id="voiceSel"><option value="">Best available (automatic)</option></select>
+      <label class="gnote" for="nameIn">How to say her name (spell it the way it sounds)</label>
+      <input class="ginput" id="nameIn" autocomplete="off">
       <div class="grow">
+        <button type="button" class="gbtn" id="testVoice">🔊 Test the voice</button>
         <button type="button" class="gbtn" id="soundBtn" aria-pressed="true">Sound effects: On</button>
         <button type="button" class="gbtn" id="voiceBtn" aria-pressed="true">Read aloud: On</button>
       </div>
-      <p class="gnote">On iPad and iPhone, sounds are silent if the side switch is on silent.</p>
+      <p class="gnote">For a much nicer voice on iPad or iPhone: Settings → Accessibility → Spoken Content → Voices → English, and download an “Enhanced” or “Premium” voice (Ava, Zoe or Serena are good). Then pick it above. Sounds are silent when the device is on silent.</p>
     </div>
     <div class="gblock">
       <button type="button" class="gbtn" id="weekBtn">Weekly scorecard</button>
@@ -432,28 +549,28 @@ select#dayType:disabled{opacity:.55}
 
 <script>
 /* ---------- the routines: few big picture tasks, each day adds up to 100 ---------- */
-// Tasks with the same part id and words carry their tick over if the type of day is changed.
+// [picture, words on the tile, what the voice cheers]
 const PLANS = {
   school:{pts:5,parts:[
-    {id:"wake",e:"🌅",t:"Wake up",at:"6:30",tone:"dawn",tasks:[["🙏","Pray"],["🚽","Toilet"],["🪥","Brush teeth"],["👕","Get dressed"]]},
-    {id:"bfast",e:"🥣",t:"Breakfast",at:"7:15",tone:"gold",tasks:[["🥣","Eat breakfast"],["💧","Drink water"],["🎒","Bag and shoes"]]},
-    {id:"school",e:"🏫",t:"School",at:"8:00",tone:"day",tasks:[["👂","Listen to my teacher"],["💛","Be kind"],["⭐","Try my best"]]},
-    {id:"after",e:"☀️",t:"After school",at:"12:45",tone:"aqua",tasks:[["🛁","Bath time"],["🍛","Eat lunch"],["😴","Rest time"]]},
-    {id:"play",e:"📚",t:"Homework & play",at:"15:00",tone:"noon",tasks:[["✏️","Homework"],["📖","Read a book"],["⚽","Play outside"]]},
-    {id:"bed",e:"🌙",t:"Bedtime",at:"19:00",tone:"dusk",tasks:[["🍽️","Eat dinner"],["🪥","Brush teeth"],["🤗","Say thank you"],["💤","Lights out"]]}
+    {id:"wake",e:"🌅",t:"Wake up",at:"6:30",tone:"dawn",tasks:[["🙏","Pray","Lovely praying!"],["🚽","Toilet","Good job! Don't forget to wash your hands!"],["🪥","Brush teeth","Sparkly clean teeth!"],["👕","Get dressed","Looking smart!"]]},
+    {id:"bfast",e:"🥣",t:"Breakfast",at:"7:15",tone:"gold",tasks:[["🥣","Eat breakfast","Yummy! Brain power!"],["💧","Drink water","Glug glug! Water power!"],["🎒","Bag and shoes","Ready, steady, go!"]]},
+    {id:"school",e:"🏫",t:"School",at:"8:00",tone:"day",tasks:[["👂","Listen to my teacher","Super listening ears!"],["💛","Be kind","Kindness makes everyone happy!"],["⭐","Try my best","You tried your best. Amazing!"]]},
+    {id:"after",e:"☀️",t:"After school",at:"12:45",tone:"aqua",tasks:[["🛁","Bath time","Squeaky clean!"],["🍛","Eat lunch","Munch munch! Well done!"],["😴","Rest time","Nice and cosy!"]]},
+    {id:"play",e:"📚",t:"Homework & play",at:"15:00",tone:"noon",tasks:[["✏️","Homework","Clever clogs!"],["📖","Read a book","What a great reader!"],["⚽","Play outside","Run, jump and play!"]]},
+    {id:"bed",e:"🌙",t:"Bedtime",at:"19:00",tone:"dusk",tasks:[["🍽️","Eat dinner","Yum yum!"],["🪥","Brush teeth","Shiny teeth for bedtime!"],["🤗","Say thank you","Thank you is a magic word!"],["💤","Lights out","Sweet dreams!"]]}
   ]},
   home:{pts:5,parts:[
-    {id:"wake",e:"🌅",t:"Wake up",at:"7:30",tone:"dawn",tasks:[["🙏","Pray"],["🚽","Toilet"],["🪥","Brush teeth"],["👕","Get dressed"]]},
-    {id:"bfast",e:"🥣",t:"Breakfast",at:"8:30",tone:"gold",tasks:[["🥣","Eat breakfast"],["💧","Drink water"],["🍽️","Clear my plate"]]},
-    {id:"learn",e:"📚",t:"Learn & help",at:"9:30",tone:"day",tasks:[["📖","Read a book"],["✏️","Learning time"],["🧹","Help at home"]]},
-    {id:"after",e:"☀️",t:"Midday",at:"12:00",tone:"aqua",tasks:[["🛁","Bath time"],["🍛","Eat lunch"],["😴","Rest time"]]},
-    {id:"play",e:"🎨",t:"Play time",at:"15:30",tone:"noon",tasks:[["⚽","Play outside"],["🎨","Draw or build"],["🧸","Tidy my toys"]]},
-    {id:"bed",e:"🌙",t:"Bedtime",at:"19:00",tone:"dusk",tasks:[["🍽️","Eat dinner"],["🪥","Brush teeth"],["🤗","Say thank you"],["💤","Lights out"]]}
+    {id:"wake",e:"🌅",t:"Wake up",at:"7:30",tone:"dawn",tasks:[["🙏","Pray","Lovely praying!"],["🚽","Toilet","Good job! Don't forget to wash your hands!"],["🪥","Brush teeth","Sparkly clean teeth!"],["👕","Get dressed","Looking smart!"]]},
+    {id:"bfast",e:"🥣",t:"Breakfast",at:"8:30",tone:"gold",tasks:[["🥣","Eat breakfast","Yummy! Brain power!"],["💧","Drink water","Glug glug! Water power!"],["🍽️","Clear my plate","Super helper!"]]},
+    {id:"learn",e:"📚",t:"Learn & help",at:"9:30",tone:"day",tasks:[["📖","Read a book","What a great reader!"],["✏️","Learning time","Your brain is growing!"],["🧹","Help at home","Best helper ever!"]]},
+    {id:"after",e:"☀️",t:"Midday",at:"12:00",tone:"aqua",tasks:[["🛁","Bath time","Squeaky clean!"],["🍛","Eat lunch","Munch munch! Well done!"],["😴","Rest time","Nice and cosy!"]]},
+    {id:"play",e:"🎨",t:"Play time",at:"15:30",tone:"noon",tasks:[["⚽","Play outside","Run, jump and play!"],["🎨","Draw or build","What a creation!"],["🧸","Tidy my toys","Your toys are happy and tidy!"]]},
+    {id:"bed",e:"🌙",t:"Bedtime",at:"19:00",tone:"dusk",tasks:[["🍽️","Eat dinner","Yum yum!"],["🪥","Brush teeth","Shiny teeth for bedtime!"],["🤗","Say thank you","Thank you is a magic word!"],["💤","Lights out","Sweet dreams!"]]}
   ]},
   sick:{pts:10,parts:[
-    {id:"smorn",e:"🌅",t:"Morning",at:"7:00",tone:"dawn",tasks:[["🪥","Brush teeth"],["💊","Medicine or check-in"],["💧","Drink water"]]},
-    {id:"srest",e:"🛋️",t:"Rest",at:"9:30",tone:"aqua",tasks:[["🛋️","Rest on the sofa"],["📖","Quiet story"],["🥣","Eat what I can"]]},
-    {id:"sbed",e:"🌙",t:"Bedtime",at:"18:30",tone:"dusk",tasks:[["💧","Drink water"],["💊","Medicine or check-in"],["🪥","Brush teeth"],["💤","Sleep early"]]}
+    {id:"smorn",e:"🌅",t:"Morning",at:"7:00",tone:"dawn",tasks:[["🪥","Brush teeth","Sparkly clean teeth!"],["💊","Medicine or check-in","So brave!"],["💧","Drink water","Water helps you get better!"]]},
+    {id:"srest",e:"🛋️",t:"Rest",at:"9:30",tone:"aqua",tasks:[["🛋️","Rest on the sofa","Resting makes you stronger!"],["📖","Quiet story","Cosy story time!"],["🥣","Eat what I can","Every bite helps!"]]},
+    {id:"sbed",e:"🌙",t:"Bedtime",at:"18:30",tone:"dusk",tasks:[["💧","Drink water","Water helps you get better!"],["💊","Medicine or check-in","So brave!"],["🪥","Brush teeth","Shiny teeth!"],["💤","Sleep early","Sleep well and get better soon!"]]}
   ]}
 };
 const MAX = 100;
@@ -462,17 +579,19 @@ const taskKey = (part,label) => part+":"+slug(label);
 const PLAN_KEYS = {};
 for(const m in PLANS) PLAN_KEYS[m]=new Set(PLANS[m].parts.flatMap(p=>p.tasks.map(([,l])=>taskKey(p.id,l))));
 
-// A new sticker set each day; one sticker for every 25 points.
-const STICKER_SETS = [
-  [["🦄","unicorn"],["🐬","dolphin"],["🦁","lion"],["🌈","rainbow"]],
-  [["🐼","panda"],["🦋","butterfly"],["🐙","octopus"],["🎠","carousel"]],
-  [["🐱","kitty"],["🌻","sunflower"],["🐢","turtle"],["👑","crown"]],
-  [["🐰","bunny"],["🍓","strawberry"],["🦒","giraffe"],["🎈","balloon"]],
-  [["🐧","penguin"],["🌸","flower"],["🐘","elephant"],["💎","diamond"]],
-  [["🦊","fox"],["🍭","lollipop"],["🐳","whale"],["🏰","castle"]],
-  [["🐨","koala"],["⭐","gold star"],["🦜","parrot"],["🎀","ribbon"]]
+/* ---------- 56 stickers to collect, in 7 themes ---------- */
+const THEMES = [
+  {id:"animals",e:"🐾",t:"Animal friends",s:[["🦄","unicorn"],["🐼","panda"],["🦁","lion"],["🐯","tiger"],["🦊","fox"],["🐨","koala"],["🐰","bunny"],["🐱","kitty"],["🐶","puppy"],["🦒","giraffe"]]},
+  {id:"ocean",e:"🌊",t:"Under the sea",s:[["🐬","dolphin"],["🐳","whale"],["🐙","octopus"],["🐠","rainbow fish"],["🦀","crab"],["🐢","turtle"],["🦈","shark"],["🐚","seashell"]]},
+  {id:"space",e:"🚀",t:"Space adventure",s:[["🚀","rocket"],["🪐","planet"],["🌙","moon"],["⭐","star"],["☄️","comet"],["👽","alien"],["🛸","flying saucer"],["🌈","rainbow"]]},
+  {id:"dino",e:"🦖",t:"Dinosaurs & dragons",s:[["🦖","T-rex"],["🦕","long-neck dinosaur"],["🐉","dragon"],["🐲","baby dragon"],["🥚","dinosaur egg"],["🌋","volcano"]]},
+  {id:"fairy",e:"🏰",t:"Fairy tale",s:[["👑","crown"],["🏰","castle"],["🧚","fairy"],["🧜‍♀️","mermaid"],["🪄","magic wand"],["💎","diamond"],["🎠","carousel"],["🦢","swan"]]},
+  {id:"yummy",e:"🍓",t:"Yummy treats",s:[["🍓","strawberry"],["🍉","watermelon"],["🧁","cupcake"],["🍩","doughnut"],["🍭","lollipop"],["🍦","ice cream"],["🥭","mango"],["🍪","cookie"]]},
+  {id:"garden",e:"🌼",t:"Garden friends",s:[["🦋","butterfly"],["🐞","ladybird"],["🐝","bee"],["🌻","sunflower"],["🌸","blossom"],["🍄","mushroom"],["🐌","snail"],["🌷","tulip"]]}
 ];
-const PRAISE = ["Yay!","Well done!","Super star!","Great job!","Brilliant!","Amazing!","You did it!"];
+const STICKERS = THEMES.flatMap(th=>th.s.map(([e,n])=>({id:th.id+":"+slug(n),e,n,theme:th.id})));
+const stickerById = id => STICKERS.find(s=>s.id===id);
+const PRAISE = ["Yay!","Well done!","Super star!","Great job!","Brilliant!","Amazing!","Woohoo!","High five!"];
 
 const store = {
   get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},
@@ -485,6 +604,8 @@ const sameDay = (a,b) => a.toDateString()===b.toDateString();
 let today = new Date(); today.setHours(12,0,0,0);
 let current = new Date(today);
 let state, part="";
+const album = Object.assign({}, store.get("inaaya-album")||{});   // sticker id -> {n, shiny, first}
+const saveAlbum = () => store.set("inaaya-album",album);
 
 /* ---------- saved days ---------- */
 const DAY_TYPES = {school:"School day",home:"Home day",weekend:"Weekend",holiday:"School holiday",sick:"Sick day",festival:"Festival",other:"No school"};
@@ -495,8 +616,6 @@ function dayTypeOf(s,d){
   return defaultType(d);
 }
 const modeOf = (s,d) => {const t=dayTypeOf(s,d);return t==="school"?"school":t==="sick"?"sick":"home"};
-
-// Days ticked on the earlier, longer chart keep the score they earned.
 function legacyScore(raw){
   const n=Object.values(raw.checks||{}).filter(Boolean).length+(raw.water||[]).filter(Boolean).length
     +((raw.family||"").trim()?1:0)+(raw.piggy==="yes"?1:0)+((raw.proud||"").trim()?1:0);
@@ -504,11 +623,11 @@ function legacyScore(raw){
 }
 function load(d){
   const raw=store.get(keyFor(d));
-  if(!raw) return {v:3,checks:{},saved:null};
-  if(raw.v===3) return Object.assign({checks:{},saved:null},raw);
-  const s={v:3,checks:{},saved:raw.saved||null};
+  if(!raw) return {v:3,checks:{},gifts:[],saved:null};
+  if(raw.v===3) return Object.assign({checks:{},gifts:[],saved:null},raw);
+  const s={v:3,checks:{},gifts:[],saved:raw.saved||null};
   if(raw.dayType) s.dayType=raw.dayType; else if(raw.mode) s.mode=raw.mode;
-  if(!sameDay(d,today)) s.legacyScore=legacyScore(raw);   // today simply starts fresh on the new chart
+  if(!sameDay(d,today)) s.legacyScore=legacyScore(raw);
   return s;
 }
 function scoreOf(s,d){
@@ -517,36 +636,83 @@ function scoreOf(s,d){
   const m=modeOf(s,d),keys=PLAN_KEYS[m];
   return PLANS[m].pts*Object.entries(s.checks).filter(([k,v])=>v&&keys.has(k)).length;
 }
+const dayStickers = s => s.legacyScore!=null ? [] : (s.gifts||[]).filter(g=>g.opened).map(g=>stickerById(g.id)).filter(Boolean);
 function save(){store.set(keyFor(current),state)}
 const plan = () => PLANS[modeOf(state,current)];
 const partById = id => plan().parts.find(p=>p.id===id);
 const partDone = p => p.tasks.every(([,l])=>state.checks[taskKey(p.id,l)]);
 const partCount = p => p.tasks.filter(([,l])=>state.checks[taskKey(p.id,l)]).length;
-function stickerSet(d){const start=new Date(d.getFullYear(),0,0);return STICKER_SETS[Math.floor((d-start)/864e5)%STICKER_SETS.length]}
 
-/* ---------- settings: sounds and read-aloud ---------- */
-const settings=Object.assign({sound:true,voice:true},store.get("inaaya-settings")||{});
+/* ---------- settings ---------- */
+const settings=Object.assign({sound:true,voice:true,voiceURI:"",sayName:"Ee-naa-ya",weekGoal:500},store.get("inaaya-settings")||{});
+const saveSettings = () => store.set("inaaya-settings",settings);
+
+/* ---------- sound effects, made on the device ---------- */
 let ac=null;
-function chime(notes){
-  if(!settings.sound) return;
-  try{
-    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
-    if(ac.state==="suspended") ac.resume();
-    const t0=ac.currentTime;
-    notes.forEach((f,i)=>{
-      const o=ac.createOscillator(),g=ac.createGain(),t=t0+i*.1;
-      o.type="triangle";o.frequency.value=f;
-      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.22,t+.015);g.gain.exponentialRampToValueAtTime(.001,t+.45);
-      o.connect(g);g.connect(ac.destination);o.start(t);o.stop(t+.5);
-    });
-  }catch(e){}
+function audio(){
+  if(!settings.sound) return null;
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended") ac.resume();return ac}catch(e){return null}
+}
+function tone(f,t,dur,type="sine",vol=.2,slideTo){
+  const a=ac,o=a.createOscillator(),g=a.createGain();
+  o.type=type;o.frequency.setValueAtTime(f,t);if(slideTo) o.frequency.exponentialRampToValueAtTime(slideTo,t+dur);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+.012);g.gain.exponentialRampToValueAtTime(.0008,t+dur);
+  o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+dur+.05);
+}
+function noise(t,dur,from,to,vol=.18,type="bandpass"){
+  const a=ac,len=Math.floor(a.sampleRate*dur),buf=a.createBuffer(1,len,a.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+  const src=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();
+  src.buffer=buf;f.type=type;f.Q.value=1.2;f.frequency.setValueAtTime(from,t);f.frequency.exponentialRampToValueAtTime(to,t+dur);
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+dur*.3);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  src.connect(f);f.connect(g);g.connect(a.destination);src.start(t);src.stop(t+dur);
+}
+const SFX = {
+  tick(){const a=audio();if(!a)return;const t=a.currentTime;tone(520,t,.12,"sine",.18,900);tone(1318,t+.08,.5,"triangle",.14);tone(1760,t+.16,.6,"sine",.1)},
+  untick(){const a=audio();if(!a)return;tone(500,a.currentTime,.18,"sine",.12,260)},
+  sparkle(){const a=audio();if(!a)return;const t=a.currentTime;[1568,1976,2349,2637,3136,3951].forEach((f,i)=>tone(f,t+i*.06,.35,"sine",.08))},
+  whoosh(){const a=audio();if(!a)return;noise(a.currentTime,.6,300,3200,.14)},
+  partDone(){const a=audio();if(!a)return;const t=a.currentTime;[523,659,784,1047].forEach((f,i)=>tone(f,t+i*.11,.45,"triangle",.16));tone(1319,t+.5,.9,"sine",.12)},
+  drumroll(ms){const a=audio();if(!a)return;const t=a.currentTime,n=Math.floor(ms/45);for(let i=0;i<n;i++) noise(t+i*.045,.05,900,700,.1+i/n*.12,"lowpass")},
+  fanfare(){const a=audio();if(!a)return;const t=a.currentTime;
+    [[523,0],[659,.13],[784,.26],[1047,.42]].forEach(([f,d])=>{tone(f,t+d,.35,"square",.05);tone(f*2,t+d,.35,"triangle",.06)});
+    [523,659,784,1047].forEach(f=>tone(f,t+.6,1.3,"triangle",.07));noise(t+.6,.9,6000,9000,.05,"highpass")},
+  bloop(){const a=audio();if(!a)return;tone(300,a.currentTime,.15,"sine",.15,620)}
+};
+
+/* ---------- the voice ---------- */
+let voices=[];
+function loadVoices(){
+  try{voices=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang))}catch(e){voices=[]}
+  const sel=$("voiceSel");if(!sel) return;
+  sel.innerHTML='<option value="">Best available (automatic)</option>'+voices.map(v=>`<option value="${v.voiceURI}">${v.name} (${v.lang})</option>`).join("");
+  sel.value=settings.voiceURI&&voices.some(v=>v.voiceURI===settings.voiceURI)?settings.voiceURI:"";
+}
+function voiceRank(v){
+  const n=v.name;let r=0;
+  if(/premium/i.test(n)) r+=50; if(/enhanced/i.test(n)) r+=40; if(/natural|neural/i.test(n)) r+=35;
+  if(/Ava|Zoe|Serena|Samantha|Karen|Moira|Tessa|Kate|Stephanie|Martha|Aria|Jenny|Sonia|Libby|Google UK English Female|Google US English/i.test(n)) r+=20;
+  if(/en[-_]GB/i.test(v.lang)) r+=6; else if(/en[-_](US|AU|IE|IN)/i.test(v.lang)) r+=4;
+  if(/compact|eloquence|novelty|bad news|bells|boing|bubbles|cellos|jester|organ|trinoids|whisper|zarvox|albert|fred|junior|ralph|grandpa|grandma|rocko|shelley|flo|eddy|reed|sandy/i.test(n)) r-=60;
+  return r;
+}
+function pickVoice(){
+  if(settings.voiceURI){const v=voices.find(v=>v.voiceURI===settings.voiceURI);if(v) return v}
+  return voices.slice().sort((a,b)=>voiceRank(b)-voiceRank(a))[0]||null;
 }
 function speak(text){
   if(!settings.voice||!("speechSynthesis" in window)) return;
-  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.92;u.pitch=1.15;speechSynthesis.speak(u)}catch(e){}
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text.replace(/Inaaya/g,settings.sayName||"Inaaya"));
+    const v=pickVoice();if(v){u.voice=v;u.lang=v.lang}
+    u.rate=.9;u.pitch=1.12;u.volume=1;
+    speechSynthesis.speak(u);
+  }catch(e){}
 }
+if("speechSynthesis" in window){try{speechSynthesis.addEventListener("voiceschanged",loadVoices)}catch(e){}}
 
-/* ---------- drawing the kid's screen ---------- */
+/* ---------- drawing the kid's day ---------- */
 const $ = id => document.getElementById(id);
 function pickPart(){
   const parts=plan().parts;
@@ -554,37 +720,34 @@ function pickPart(){
   const now=new Date(),mins=now.getHours()*60+now.getMinutes();
   let byTime=parts[0];
   for(const p of parts){const [h,m]=p.at.split(":").map(Number);if(h*60+m<=mins) byTime=p}
-  // start at the part for this time of day, unless an earlier part still needs finishing
   const firstOpen=parts.find(p=>!partDone(p));
   return (firstOpen&&parts.indexOf(firstOpen)<parts.indexOf(byTime)?firstOpen:byTime).id;
 }
 function fmtTime(at){const [h,m]=at.split(":").map(Number);return `${(h+11)%12+1}:${String(m).padStart(2,"0")} ${h<12?"am":"pm"}`}
-
+let lastScore=null;
 function paint(){
   const m=modeOf(state,current),type=dayTypeOf(state,current),pl=PLANS[m];
   if(!partById(part)) part=pickPart();
-  const isToday=sameDay(current,today);
+  const isToday=sameDay(current,today),legacy=state.legacyScore!=null;
   $("kDay").textContent=(isToday?"":"Looking at ")+current.toLocaleDateString(undefined,{weekday:"long"})+" · "+
     (m==="school"?"🏫 School day":m==="sick"?"🤒 Rest day, get well soon":"🏠 "+DAY_TYPES[type]);
-
-  const legacy=state.legacyScore!=null;
   $("legacyMsg").hidden=!legacy;$("steps").hidden=legacy;$("partArea").hidden=legacy;
-  if(legacy) $("legacyMsg").textContent=`This day was ticked on the old chart and scored ${state.legacyScore} points.`;
+  if(legacy) $("legacyMsg").textContent=`This day was ticked on the old chart and scored ${state.legacyScore} stars.`;
   $("savedMsg").hidden=!(state.saved&&!legacy);
   $("finishBtn").parentElement.hidden=!!state.saved||legacy;
   $("dayChip").disabled=!!state.saved||legacy;
   $("kidView").classList.toggle("locked",!!state.saved);
 
-  // score, rocket and stickers
   const sc=scoreOf(state,current),ks=$("kScore");
   if(ks.textContent!==String(sc)){ks.textContent=sc;$("scoreBig").classList.remove("bump");void $("scoreBig").offsetWidth;$("scoreBig").classList.add("bump")}
   document.querySelector(".track").style.setProperty("--p",sc/MAX);
   $("trail").style.width=`calc(60px + (100% - 134px) * ${sc/MAX})`;
-  const set=stickerSet(current);
-  $("stickers").innerHTML=set.map(([e,n],i)=>`<span class="slot${sc>=(i+1)*25?" got":""}" title="${n}"><span>${e}</span><small>${(i+1)*25}</small></span>`).join("");
+  if(lastScore!=null&&sc>lastScore) SFX.whoosh();
+  lastScore=sc;
+  paintGifts(sc);
+  paintBadge();
+  if(legacy){paintGrown();return}
 
-  if(legacy) return;
-  // parts of the day
   $("steps").innerHTML=pl.parts.map(p=>{
     const n=partCount(p);
     return `<button type="button" role="tab" class="step${partDone(p)?" done":""}" data-tone="${p.tone}" id="step-${p.id}" data-part="${p.id}" aria-selected="${p.id===part}">
@@ -595,7 +758,7 @@ function paint(){
   const tiles=$("tiles");tiles.dataset.tone=p.tone;
   tiles.innerHTML=p.tasks.map(([e,l],i)=>{
     const k=taskKey(p.id,l),on=!!state.checks[k];
-    return `<div class="tilewrap"><button type="button" class="tile" id="tile-${i}" data-k="${k}" aria-pressed="${on}">
+    return `<div class="tilewrap"><button type="button" class="tile" id="tile-${i}" data-k="${k}" data-i="${i}" aria-pressed="${on}">
       <span class="temoji">${e}</span><span class="tlabel">${l}</span><span class="tpts">+${pl.pts} ⭐</span></button>
       <span class="tcheck" aria-hidden="true">✓</span>
       <button type="button" class="tsay" data-say="${l}" aria-label="Hear ${l}">🔊</button></div>`;
@@ -605,57 +768,130 @@ function paint(){
   if(partDone(p)&&next&&next!==p){nb.hidden=false;nb.dataset.part=next.id;nb.textContent=`Next: ${next.e} ${next.t} →`}else nb.hidden=true;
   paintGrown();
 }
+function paintGifts(sc){
+  const g=state.gifts||[];
+  $("gifts").innerHTML=[1,2,3,4].map(i=>{
+    const gift=g[i-1];
+    if(state.legacyScore!=null||(!gift&&sc<i*25)) return `<span class="slot locked" aria-label="Surprise at ${i*25} stars"><span>?</span><small>${i*25}</small></span>`;
+    if(!gift||!gift.opened) return `<button type="button" class="slot gift" data-gift="${i-1}" aria-label="Open your surprise"><span>🎁</span><small>${i*25}</small></button>`;
+    const s=stickerById(gift.id);
+    return `<button type="button" class="slot got${gift.shiny?" shiny":""}${gift.fresh?" fresh":""}" data-got="${gift.id}" aria-label="${s.n} sticker"><span>${s.e}</span><small>${i*25}</small></button>`;
+  }).join("");
+}
+function paintBadge(){
+  const unopened=(state.gifts||[]).filter(g=>!g.opened).length;
+  $("nav-book").innerHTML=`<span>📒</span>Stickers${unopened?` <span class="badge">${unopened}</span>`:""}`;
+}
 
 /* ---------- ticking a task ---------- */
 let advanceTimer=0;
 $("tiles").addEventListener("click",e=>{
   const s=e.target.closest(".tsay");
-  if(s){speak(s.dataset.say);return}
+  if(s){SFX.bloop();speak(s.dataset.say);return}
   const t=e.target.closest(".tile");if(!t) return;
-  if(state.saved){speak("Today is all saved!");return}
+  if(state.saved){speak("Today is all saved! Well done!");return}
   const k=t.dataset.k,on=!state.checks[k],pl=plan(),p=partById(part);
+  const task=p.tasks[+t.dataset.i];
   const before=scoreOf(state,current),wasDone=partDone(p);
-  state.checks[k]=on;save();
+  state.checks[k]=on;
   const r=t.getBoundingClientRect();
-  paint();
-  if(!on) return;
-  const el=document.querySelector(`.tile[data-k="${k}"]`);el.classList.add("yay");
-  floatPts(r.left+r.width/2,r.top+20,`+${pl.pts} ⭐`);
-  chime([784,1047]);
-  const label=el.querySelector(".tlabel").textContent;
   const after=scoreOf(state,current);
-  const newSticker=Math.floor(after/25)>Math.floor(before/25);
-  if(!wasDone&&partDone(p)){
-    confetti(r.left+r.width/2,r.top+r.height/2,90);
-    setTimeout(()=>chime([523,659,784,1047]),250);
-  }
-  if(after===MAX){setTimeout(()=>celebrate("🏆","Perfect day! You got all 100 stars!",`Perfect day! You got all 100 stars, ${"Inaaya"}!`),500);return}
-  if(newSticker){const [se,sn]=stickerSet(current)[Math.floor(after/25)-1];setTimeout(()=>celebrate(se,`You got a ${sn} sticker!`,`${label}. You got a ${sn} sticker!`),450);return}
-  if(!wasDone&&partDone(p)){
-    speak(`${label}. ${p.t}, all done! Great job!`);
+  const newGift=earnGifts(after);
+  save();paint();
+  if(!on){SFX.untick();return}
+  document.querySelector(`.tile[data-k="${k}"]`)?.classList.add("yay");
+  floatPts(r.left+r.width/2,r.top+20,`+${pl.pts} ⭐`);
+  SFX.tick();
+  const finishedPart=!wasDone&&partDone(p);
+  if(finishedPart){confetti(r.left+r.width/2,r.top+r.height/2,90);setTimeout(SFX.partDone,300)}
+  if(newGift){setTimeout(()=>showGift(),finishedPart?2000:1600);speak(`${task[2]}`);return}
+  if(finishedPart){
+    speak(`${task[2]} ${p.t}, all done! Great job, Inaaya!`);
     clearTimeout(advanceTimer);
-    advanceTimer=setTimeout(()=>{const nb=$("nextBtn");if(!nb.hidden) goPart(nb.dataset.part)},2200);
-  } else speak(`${label}. ${PRAISE[Math.floor(Math.random()*PRAISE.length)]}`);
+    advanceTimer=setTimeout(()=>{const nb=$("nextBtn");if(!nb.hidden&&$("giftPop").hidden) goPart(nb.dataset.part)},3200);
+  } else speak(`${task[2]} ${Math.random()<.5?PRAISE[Math.floor(Math.random()*PRAISE.length)]:""}`);
 });
 function floatPts(x,y,text){const f=document.createElement("span");f.className="float";f.textContent=text;f.style.left=(x-30)+"px";f.style.top=y+"px";document.body.appendChild(f);setTimeout(()=>f.remove(),1000)}
-function goPart(id){clearTimeout(advanceTimer);part=id;paint();const p=partById(id);speak(p.t+" time!");$("steps").querySelector(`[data-part="${id}"]`)?.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});$("partArea").scrollIntoView({behavior:"smooth",block:"start"})}
+function goPart(id){clearTimeout(advanceTimer);part=id;paint();const p=partById(id);SFX.bloop();speak(p.t+" time!");$("steps").querySelector(`[data-part="${id}"]`)?.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});$("partArea").scrollIntoView({behavior:"smooth",block:"start"})}
 $("steps").addEventListener("click",e=>{const b=e.target.closest("[data-part]");if(b) goPart(b.dataset.part)});
 $("nextBtn").addEventListener("click",()=>goPart($("nextBtn").dataset.part));
 $("sayPart").addEventListener("click",()=>{const p=partById(part);speak(`${p.t}. ${p.tasks.map(([,l])=>l).join(". ")}.`)});
 
+/* ---------- surprise gifts: a new sticker every 25 stars ---------- */
+function pickSticker(forceShiny){
+  const taken=new Set((state.gifts||[]).map(g=>g.id));
+  let pool=STICKERS.filter(s=>!album[s.id]&&!taken.has(s.id));
+  if(!pool.length) pool=STICKERS.filter(s=>!taken.has(s.id));
+  const s=pool[Math.floor(Math.random()*pool.length)];
+  return {id:s.id,shiny:forceShiny||Math.random()<.15,opened:false};
+}
+function earnGifts(sc){
+  state.gifts=state.gifts||[];
+  let added=false;
+  while(state.gifts.length<Math.floor(sc/25)){state.gifts.push(pickSticker(state.gifts.length===3));added=true}
+  return added;
+}
+let giftIdx=-1,giftStage="";
+function showGift(i){
+  const g=state.gifts||[];
+  giftIdx=i!=null?i:g.findIndex(x=>!x.opened);
+  if(giftIdx<0) return;
+  giftStage="closed";
+  const big=$("giftBig");big.className="giftbig";big.textContent="🎁";
+  $("giftNew").hidden=true;
+  $("giftText").textContent=giftIdx===3?"A perfect day surprise!":"You earned a surprise!";
+  $("giftSub").textContent="What could it be?";
+  $("giftBtn").textContent="Open it!";
+  $("giftPop").hidden=false;$("giftBtn").focus();
+  SFX.sparkle();
+  setTimeout(()=>speak(giftIdx===3?"Wow! A perfect day! Tap to open your special surprise!":"You earned a surprise! Tap to open it!"),350);
+}
+function openGift(){
+  const g=state.gifts[giftIdx];if(!g) return;
+  giftStage="opening";$("giftBtn").disabled=true;
+  const big=$("giftBig");big.classList.add("shake");$("giftText").textContent="Ooh…";$("giftSub").textContent="";
+  SFX.drumroll(1100);
+  setTimeout(()=>{
+    const s=stickerById(g.id),isNew=!album[g.id];
+    album[g.id]={n:(album[g.id]?.n||0)+1,shiny:!!(album[g.id]?.shiny||g.shiny),first:album[g.id]?.first||current.toISOString().slice(0,10)};
+    saveAlbum();
+    g.opened=true;g.fresh=true;save();
+    big.className="giftbig reveal"+(g.shiny?" shiny":"");big.textContent=s.e;
+    $("giftNew").hidden=!isNew;
+    $("giftText").textContent=(g.shiny?"A shiny ":/^[aeiou]/i.test(s.n)?"An ":"A ")+s.n+"!";
+    $("giftSub").textContent=isNew?`It’s going in your sticker book! You have ${Object.keys(album).length} of ${STICKERS.length}.`:"Another one for your collection!";
+    $("giftBtn").textContent=giftIdx===3?"Perfect day!":"Yay!";$("giftBtn").disabled=false;
+    giftStage="open";
+    SFX.fanfare();confetti(innerWidth/2,innerHeight/2.6,g.shiny?220:140);
+    speak(`${g.shiny?"Wow! A shiny ":"It's a "}${s.n}! ${isNew?"A new sticker for your sticker book!":"Another one for your collection!"}${giftIdx===3?" And you got all 100 stars today. Perfect day, Inaaya!":""}`);
+    paint();g.fresh=false;
+  },1150);
+}
+$("giftBtn").addEventListener("click",()=>{
+  if(giftStage==="closed"){openGift();return}
+  if(giftStage!=="open") return;
+  $("giftPop").hidden=true;giftStage="";
+  if((state.gifts||[]).some(x=>!x.opened)){setTimeout(()=>showGift(),300);return}
+  const nb=$("nextBtn");if(!nb.hidden&&$("kidView").hidden===false&&partDone(partById(part))) goPart(nb.dataset.part);
+});
+$("gifts").addEventListener("click",e=>{
+  const g=e.target.closest("[data-gift]");if(g){showGift(+g.dataset.gift);return}
+  const o=e.target.closest("[data-got]");if(o){const s=stickerById(o.dataset.got);SFX.sparkle();speak(`Your ${s.n} sticker!`)}
+});
+
 function celebrate(emoji,text,spoken){
   $("cEmoji").textContent=emoji;$("cText").textContent=text;$("celebrate").hidden=false;
-  confetti(innerWidth/2,innerHeight/3,180);chime([523,659,784,1047,1319]);speak(spoken||text);
+  confetti(innerWidth/2,innerHeight/3,160);SFX.fanfare();speak(spoken||text);
   $("cOk").focus();
 }
-$("cOk").addEventListener("click",()=>{$("celebrate").hidden=true;const nb=$("nextBtn");if(!nb.hidden&&partDone(partById(part))) goPart(nb.dataset.part)});
+$("cOk").addEventListener("click",()=>{$("celebrate").hidden=true});
 
 /* ---------- Inaaya picks the kind of day ---------- */
 $("dayChip").addEventListener("click",()=>{
   if(state.saved) return;
   const m=modeOf(state,current);
   document.querySelectorAll("#typePick .choice").forEach(b=>b.setAttribute("aria-pressed",b.dataset.type===m));
-  $("typePick").hidden=false;$("pick-"+m).focus();
+  $("typePick").hidden=false;$("pick-"+m).focus();SFX.bloop();
   speak("What kind of day is it? School day, home day, or sick day?");
 });
 $("typePick").addEventListener("click",e=>{
@@ -663,40 +899,124 @@ $("typePick").addEventListener("click",e=>{
   const b=e.target.closest("[data-type]");if(!b) return;
   const want=b.dataset.type;$("typePick").hidden=true;
   if(want!==modeOf(state,current)){
-    // "Home" keeps a grown-up's more specific choice (holiday, festival…) and is simply "Weekend" on Sat/Sun
     const keepHome=["home","weekend","holiday","festival","other"].includes(state.dayType);
     const t=want==="home"?(isWeekend(current)?"weekend":keepHome?state.dayType:"home"):want;
     delete state.mode;
     if(t===defaultType(current)) delete state.dayType; else state.dayType=t;
     save();part=pickPart();paint();
   }
-  speak({school:"School day!",home:"Home day!",sick:"Sick day. Get well soon!"}[want]);
+  SFX.sparkle();
+  speak({school:"School day! Let's go!",home:"Home day! Hooray!",sick:"Sick day. Rest well and get better soon!"}[want]);
 });
 
-/* ---------- Inaaya saves her day, after saying yes twice ---------- */
+/* ---------- Inaaya saves her day, after saying yes ---------- */
 $("finishBtn").addEventListener("click",()=>{
   if(state.saved) return;
-  $("confirmSave").hidden=false;$("confirmNo").focus();
+  $("confirmSave").hidden=false;$("confirmNo").focus();SFX.bloop();
   speak("Are you sure you're finished? Once you save, you can't change today.");
 });
-$("confirmNo").addEventListener("click",()=>{$("confirmSave").hidden=true;speak("Okay! Keep going!")});
+$("confirmNo").addEventListener("click",()=>{$("confirmSave").hidden=true;speak("Okay! Keep going, you can do it!")});
 $("confirmSave").addEventListener("click",e=>{if(e.target.id==="confirmSave")$("confirmSave").hidden=true});
 $("confirmYes").addEventListener("click",()=>{
   $("confirmSave").hidden=true;
   state.saved=Date.now();save();paint();
   const sc=scoreOf(state,current);
-  celebrate("🌙",`Day saved! You got ${sc} stars today!`,`Day saved! You got ${sc} stars today. Well done, Inaaya!`);
+  celebrate("🌙",`Day saved! You got ${sc} stars today!`,`Day saved! You got ${sc} stars today. Well done, Inaaya! Sweet dreams!`);
 });
+
+/* ---------- kid pages: my day / my week / sticker book ---------- */
+function showKid(v){
+  $("kidView").hidden=v!=="day";$("kidWeek").hidden=v!=="kweek";$("kidBook").hidden=v!=="book";
+  document.querySelectorAll(".knav [data-view]").forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));
+  window.scrollTo(0,0);
+}
+document.querySelector(".knav").addEventListener("click",e=>{
+  const b=e.target.closest("[data-view]");if(!b) return;
+  SFX.bloop();
+  if(b.dataset.view==="kweek"){renderKidWeek();showKid("kweek");speak(weekPep())}
+  else if(b.dataset.view==="book"){renderBook();showKid("book");
+    const un=(state.gifts||[]).filter(g=>!g.opened).length;
+    speak(un?"You have a surprise to open! Go to My day and tap the present!":`Your sticker book! You have ${Object.keys(album).length} stickers. Can you find them all?`)}
+  else {showKid("day");speak("My day!")}
+});
+
+function mondayOf(d){const m=new Date(d);m.setDate(m.getDate()-(m.getDay()+6)%7);m.setHours(12,0,0,0);return m}
+const weekKey=m=>"inaaya-week:"+m.toISOString().slice(0,10);
+function loadWeek(m){return Object.assign({complete:{},rating:"",proud:"",reward:"",note:""},store.get(weekKey(m))||{})}
+function weekStats(mon){
+  const days=[];let total=0;
+  for(let i=0;i<7;i++){
+    const d=new Date(mon);d.setDate(d.getDate()+i);
+    const raw=store.get(keyFor(d)),s=raw?load(d):null,sc=s?scoreOf(s,d):null;
+    if(sc!=null) total+=sc;
+    days.push({d,s,raw,sc,stick:s?dayStickers(s):[]});
+  }
+  return {days,total};
+}
+function streak(){
+  let n=0;const d=new Date(today);
+  const sc0=store.get(keyFor(d))?scoreOf(load(d),d):null;
+  if(sc0==null||sc0<75) d.setDate(d.getDate()-1);   // today doesn't break a streak before it's done
+  for(let i=0;i<60;i++){const sc=store.get(keyFor(d))?scoreOf(load(d),d):null;if(sc!=null&&sc>=75){n++;d.setDate(d.getDate()-1)}else break}
+  return n;
+}
+function weekPep(){
+  const mon=mondayOf(today),{total,days}=weekStats(mon),goal=+settings.weekGoal;
+  const left=goal-total,daysLeft=days.filter(x=>x.d>=today&&!(x.s&&x.s.saved)).length;
+  if(total>=goal) return `You have ${total} stars this week! You opened the treasure chest! Amazing week, Inaaya!`;
+  if(!daysLeft) return `You got ${total} stars this week. Great try! A new week is coming!`;
+  if(left>daysLeft*MAX) return `You have ${total} stars this week. Let's get as many stars as we can!`;
+  return `You have ${total} stars this week! ${left} more stars to open the treasure chest. That's about ${Math.ceil(left/daysLeft/5)*5} stars a day. You can do it!`;
+}
+const FACES = sc => sc==null?"⚪":sc>=90?"🤩":sc>=75?"😄":sc>=50?"😊":sc>0?"🙂":"⚪";
+function renderKidWeek(){
+  const mon=mondayOf(today),{days,total}=weekStats(mon),goal=+settings.weekGoal;
+  const last=weekStats(new Date(mon.getTime()-7*864e5)).total;
+  const p=Math.min(1,total/goal),open=total>=goal;
+  $("kwStars").textContent=total;$("kwGoal").textContent=goal;
+  document.querySelector(".chesttrack").style.setProperty("--p",p);
+  $("chestFill").style.width=`calc(40px + (100% - 110px) * ${p})`;
+  $("chest").textContent=open?"🎉":"🧰";$("chest").classList.toggle("open",open);
+  $("kwMsg").textContent=weekPep().replace(/, Inaaya/,"");
+  const st=streak(),meta=[];
+  if(st>=2) meta.push(`<span class="chip fire">🔥 ${st} super days in a row!</span>`);
+  if(last>0) meta.push(total>last?`<span class="chip win">🎉 More stars than last week (${last})!</span>`:`<span class="chip">Last week: ${last} ⭐</span>`);
+  const stickersWeek=days.reduce((a,x)=>a+x.stick.length,0);
+  meta.push(`<span class="chip">🎁 ${stickersWeek} stickers this week</span>`);
+  $("kwMeta").innerHTML=meta.join("");
+  const wk=loadWeek(mon);
+  $("rewardE").textContent=open?"🥳":"🎁";
+  $("rewardLabel").textContent=open?"You won":"Treasure chest reward";
+  $("rewardText").textContent=wk.reward.trim()||"Ask a grown-up to choose a reward!";
+  $("bubbles").innerHTML=days.map(({d,sc,stick})=>{
+    const fut=d>today,isT=sameDay(d,today);
+    return `<div class="bubble${isT?" today":""}${fut?" future":""}"><span class="bd">${isT?"Today":d.toLocaleDateString(undefined,{weekday:"short"})}</span>
+      <span class="bf">${fut?"☁️":FACES(sc)}</span><span class="bs">${sc==null?"—":sc+" ⭐"}</span><span class="bk">${stick.map(s=>s.e).join("")}</span></div>`;
+  }).join("");
+}
+$("sayWeek").addEventListener("click",()=>speak(weekPep()));
+
+function renderBook(){
+  const have=Object.keys(album).filter(id=>stickerById(id)).length;
+  $("bookCount").textContent=`${have} of ${STICKERS.length}`;
+  $("bookBar").style.width=(have/STICKERS.length*100)+"%";
+  $("themes").innerHTML=THEMES.map(th=>{
+    const list=STICKERS.filter(s=>s.theme===th.id),got=list.filter(s=>album[s.id]).length;
+    return `<section class="theme"><h3><span>${th.e} ${th.t}</span><small>${got} of ${list.length}${got===list.length?" 🏅":""}</small></h3>
+      <div class="bgrid">${list.map(s=>album[s.id]
+        ?`<button type="button" class="bslot have${album[s.id].shiny?" shiny":""}" data-st="${s.id}" aria-label="${s.n}">${s.e}${album[s.id].n>1?`<span class="cnt">×${album[s.id].n}</span>`:""}</button>`
+        :`<span class="bslot missing" aria-label="Not found yet">?</span>`).join("")}</div></section>`;
+  }).join("");
+}
+$("themes").addEventListener("click",e=>{const b=e.target.closest("[data-st]");if(!b) return;const s=stickerById(b.dataset.st),a=album[s.id];SFX.sparkle();speak(`${a.shiny?"Shiny ":""}${s.n}!${a.n>1?` You have ${a.n} of these!`:""}`)});
 
 /* ---------- grown-ups sheet (behind the PIN) ---------- */
 let unlockedUntil=0;
-function openSheet(){unlockedUntil=Date.now()+5*60e3;$("sheet").hidden=false;paintGrown();$("sheetClose").focus()}
-$("grownBtn").addEventListener("click",()=>{
-  if(Date.now()<unlockedUntil){openSheet();return}
-  openPin(getPin()?"enter":"create",openSheet);
-});
-$("sheetClose").addEventListener("click",()=>{$("sheet").hidden=true});
-$("sheet").addEventListener("click",e=>{if(e.target.id==="sheet")$("sheet").hidden=true});
+function openSheet(){unlockedUntil=Date.now()+5*60e3;loadVoices();$("sheet").hidden=false;paintGrown();$("sheetClose").focus()}
+$("grownBtn").addEventListener("click",()=>{if(Date.now()<unlockedUntil){openSheet();return}openPin(getPin()?"enter":"create",openSheet)});
+$("sheetClose").addEventListener("click",()=>{$("sheet").hidden=true;refreshKid()});
+$("sheet").addEventListener("click",e=>{if(e.target.id==="sheet"){$("sheet").hidden=true;refreshKid()}});
+function refreshKid(){if(!$("kidWeek").hidden) renderKidWeek();if(!$("kidBook").hidden) renderBook()}
 function paintGrown(){
   const isToday=sameDay(current,today),legacy=state.legacyScore!=null;
   $("gDate").textContent=(isToday?"Today, ":"")+current.toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});
@@ -704,10 +1024,13 @@ function paintGrown(){
   const sel=$("dayType");sel.value=dayTypeOf(state,current);sel.disabled=!!state.saved||legacy;
   $("saveDay").hidden=!!state.saved;$("unlockDay").hidden=!state.saved;$("saveDay").disabled=legacy;
   $("savedNote").className="gnote"+(state.saved?" ok":"");
-  $("savedNote").textContent=state.saved?"✓ Saved at "+new Date(state.saved).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})+". Unlock to make changes.":"Locking stops any more ticks until you unlock it here.";
+  $("savedNote").textContent=state.saved?"✓ Saved at "+new Date(state.saved).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})+". Unlock to make changes.":"Inaaya can also save her own day with “I’m finished for today”.";
   $("reset").disabled=!!state.saved;
   $("soundBtn").setAttribute("aria-pressed",settings.sound);$("soundBtn").textContent="Sound effects: "+(settings.sound?"On":"Off");
   $("voiceBtn").setAttribute("aria-pressed",settings.voice);$("voiceBtn").textContent="Read aloud: "+(settings.voice?"On":"Off");
+  $("goalSel").value=String(settings.weekGoal);
+  const wk=loadWeek(mondayOf(today));if(document.activeElement!==$("rewardIn")) $("rewardIn").value=wk.reward;
+  if(document.activeElement!==$("nameIn")) $("nameIn").value=settings.sayName;
 }
 $("dayType").addEventListener("change",e=>{
   if(state.saved) return;
@@ -715,10 +1038,15 @@ $("dayType").addEventListener("change",e=>{
   if(t===defaultType(current)) delete state.dayType; else state.dayType=t;
   save();part=pickPart();paint();
 });
-$("saveDay").addEventListener("click",()=>{state.saved=Date.now();save();paint();const r=$("saveDay").getBoundingClientRect();confetti(r.left+r.width/2,r.top,100)});
+$("saveDay").addEventListener("click",()=>{state.saved=Date.now();save();paint()});
 $("unlockDay").addEventListener("click",()=>{state.saved=null;save();paint()});
-$("soundBtn").addEventListener("click",()=>{settings.sound=!settings.sound;store.set("inaaya-settings",settings);paintGrown();chime([784,1047])});
-$("voiceBtn").addEventListener("click",()=>{settings.voice=!settings.voice;store.set("inaaya-settings",settings);paintGrown();speak("Read aloud is on")});
+$("soundBtn").addEventListener("click",()=>{settings.sound=!settings.sound;saveSettings();paintGrown();SFX.tick()});
+$("voiceBtn").addEventListener("click",()=>{settings.voice=!settings.voice;saveSettings();paintGrown();speak("Read aloud is on")});
+$("voiceSel").addEventListener("change",e=>{settings.voiceURI=e.target.value;saveSettings();speak("Hi Inaaya! Brush teeth. Sparkly clean teeth!")});
+$("nameIn").addEventListener("input",e=>{settings.sayName=e.target.value.trim()||"Inaaya";saveSettings()});
+$("testVoice").addEventListener("click",()=>{SFX.tick();speak("Hi Inaaya! Brush teeth. Sparkly clean teeth! You earned a surprise!")});
+$("goalSel").addEventListener("change",e=>{settings.weekGoal=+e.target.value;saveSettings()});
+$("rewardIn").addEventListener("input",e=>{const m=mondayOf(today),wk=loadWeek(m);wk.reward=e.target.value;store.set(weekKey(m),wk)});
 $("weekBtn").addEventListener("click",()=>{$("sheet").hidden=true;showView("week")});
 $("changePin").addEventListener("click",()=>openPin("change"));
 const resetBtn=$("reset");
@@ -729,7 +1057,7 @@ resetBtn.addEventListener("click",()=>{
 });
 $("prevDay").onclick=()=>{const d=new Date(current);d.setDate(d.getDate()-1);setDay(d)};
 $("nextDay").onclick=()=>{const d=new Date(current);d.setDate(d.getDate()+1);if(d<=today)setDay(d)};
-function setDay(d){current=d;state=load(d);part=pickPart();resetBtn.classList.remove("arm");resetBtn.textContent="Clear this day";paint()}
+function setDay(d){current=d;state=load(d);part=pickPart();lastScore=null;resetBtn.classList.remove("arm");resetBtn.textContent="Clear this day";paint()}
 
 /* ---------- parent PIN ---------- */
 const PIN_KEY="inaaya-parent-pin";
@@ -787,35 +1115,30 @@ $("pad").addEventListener("click",e=>{const b=e.target.closest("[data-k]");if(b)
 $("pinForgot").onclick=()=>setPinMode("gate");
 pinWrap.addEventListener("click",e=>{if(e.target===pinWrap)closePin()});
 document.addEventListener("keydown",e=>{
-  if(!pinWrap.hidden){
-    if(e.key==="Escape")closePin();else if(/^[0-9]$/.test(e.key))pinKey(e.key);else if(e.key==="Backspace")pinKey("back");
-  } else if(e.key==="Escape"){["sheet","celebrate","typePick","confirmSave"].forEach(id=>$(id).hidden=true)}
+  if(!pinWrap.hidden){if(e.key==="Escape")closePin();else if(/^[0-9]$/.test(e.key))pinKey(e.key);else if(e.key==="Backspace")pinKey("back")}
+  else if(e.key==="Escape"){["sheet","celebrate","typePick","confirmSave"].forEach(id=>$(id).hidden=true)}
 });
 
-/* ---------- weekly scorecard ---------- */
+/* ---------- weekly scorecard (grown-ups) ---------- */
 const DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 const RATINGS=["Excellent","Very good","Good","Keep trying"];
 const WEEK_MAX=MAX*7;
-function mondayOf(d){const m=new Date(d);m.setDate(m.getDate()-(m.getDay()+6)%7);m.setHours(12,0,0,0);return m}
-const weekKey=m=>"inaaya-week:"+m.toISOString().slice(0,10);
 let weekStart=mondayOf(today), wk;
-function loadWeek(m){return Object.assign({complete:{},rating:"",proud:"",reward:"",note:""},store.get(weekKey(m))||{})}
 function saveWeek(){store.set(weekKey(weekStart),wk)}
-function dayScore(d){return store.get(keyFor(d))?scoreOf(load(d),d):null}
 function suggestRating(avg){return avg==null?"":avg>=.9*MAX?"Excellent":avg>=.75*MAX?"Very good":avg>=.5*MAX?"Good":"Keep trying"}
 function renderWeek(){
   wk=loadWeek(weekStart);
   const end=new Date(weekStart);end.setDate(end.getDate()+6);
   const fmt=d=>d.toLocaleDateString(undefined,{day:"numeric",month:"short"});
-  $("weekLabel").textContent=`Week of ${fmt(weekStart)} – ${fmt(end)} · 100 points a day · 700 possible`;
+  $("weekLabel").textContent=`Week of ${fmt(weekStart)} – ${fmt(end)} · 100 points a day · goal ${settings.weekGoal}`;
   $("nextWeek").disabled=weekStart.getTime()===mondayOf(today).getTime();
+  const {days}=weekStats(weekStart);
   let total=0,recorded=0,best=null,done=0,stickers=0;const tiles=[];
-  DAYS.forEach((name,i)=>{
-    const d=new Date(weekStart);d.setDate(d.getDate()+i);
-    const raw=store.get(keyFor(d)),sc=dayScore(d),future=d>today,isToday=sameDay(d,today);
-    if(sc!=null){total+=sc;recorded++;stickers+=Math.floor(sc/25);if(!best||sc>best.sc)best={name,sc}}
+  days.forEach(({d,raw,sc,stick},i)=>{
+    const name=DAYS[i],future=d>today,isToday=sameDay(d,today);
+    if(sc!=null){total+=sc;recorded++;stickers+=stick.length;if(!best||sc>best.sc)best={name,sc}}
     if(wk.complete[i])done++;
-    const m=modeOf(raw,d),set=stickerSet(d),got=sc==null?0:Math.floor(sc/25);
+    const m=modeOf(raw,d);
     tiles.push(`<div class="daytile${m!=="school"?" homeday":""}${isToday?" is-today":""}${future?" future":""}">
       <div class="dname">${name}</div><div class="ddate">${isToday?"Today":fmt(d)}</div>
       <span class="dmode">${m==="school"?"School":DAY_TYPES[dayTypeOf(raw,d)]}</span>
@@ -823,7 +1146,7 @@ function renderWeek(){
         <span class="glass" aria-hidden="true"><span style="height:${(sc||0)/MAX*100}%"></span></span>
         <span class="dscore">${sc==null?"—":sc}<small>out of ${MAX}</small></span>
       </button>
-      <span class="dstick" aria-label="${got} stickers">${set.slice(0,got).map(([e])=>e).join("")}</span>
+      <span class="dstick" aria-label="${stick.length} stickers">${stick.map(s=>s.e).join("")}</span>
       ${raw&&raw.saved?'<span class="dsaved">✓ Saved</span>':""}
       <button type="button" class="dcomplete" id="done-${i}" data-done="${i}" aria-pressed="${!!wk.complete[i]}" ${future?"disabled":""}><span class="box">✓</span>Day complete</button>
     </div>`);
@@ -832,6 +1155,7 @@ function renderWeek(){
   tiles.push(`<aside class="summary">
     <h2>Weekly summary</h2>
     <div class="srow"><span class="dlabel">Total points</span><span class="sval">${total}<small> / ${WEEK_MAX}</small></span></div>
+    <div class="srow"><span class="dlabel">Treasure chest</span><span class="sval">${total>=settings.weekGoal?"Opened 🎉":`${settings.weekGoal-total}<small> to go</small>`}</span></div>
     <div class="srow"><span class="dlabel">Stickers earned</span><span class="sval">${stickers}<small> / 28</small></span></div>
     <div class="srow"><span class="dlabel">Days completed</span><span class="sval">${done}<small> / 7</small></span></div>
     <div class="srow"><span class="dlabel">Best day</span><span class="sval">${best?`${best.name} <small>${best.sc}</small>`:"—"}</span></div>
@@ -856,8 +1180,9 @@ $("nextWeek").onclick=()=>{const n=new Date(weekStart);n.setDate(n.getDate()+7);
 $("backToDay").onclick=()=>{setDay(new Date(today));showView("day")};
 function showView(v){
   const week=v==="week";
-  $("weekView").hidden=!week;$("kidView").hidden=week;$("kbar").hidden=week;
-  if(week){weekStart=mondayOf(current);renderWeek()}
+  $("weekView").hidden=!week;$("kbar").hidden=week;
+  if(week){$("kidView").hidden=$("kidWeek").hidden=$("kidBook").hidden=true;weekStart=mondayOf(current);renderWeek()}
+  else showKid("day");
   window.scrollTo(0,0);
 }
 
@@ -891,6 +1216,7 @@ function checkNewDay(){
   today=now;
   setDay(wasOnToday?new Date(today):current);
   if(!$("weekView").hidden){weekStart=mondayOf(today);renderWeek()}
+  refreshKid();
 }
 document.addEventListener("visibilitychange",()=>{if(!document.hidden) checkNewDay()});
 setInterval(checkNewDay,60000);
@@ -903,6 +1229,7 @@ if("serviceWorker" in navigator){
 }
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{});
 
+loadVoices();
 setDay(current);
 </script>
 </body>
