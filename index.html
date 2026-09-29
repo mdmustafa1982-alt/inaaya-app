@@ -1257,7 +1257,14 @@ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().cat
 /* ---------- sync between family devices (Firebase) ---------- */
 // Paste the Firebase web-app config here to switch sync on. Security comes from the Firestore rules
 // (signed-in devices only) plus the long, secret family code.
-var FIREBASE_CONFIG = null;
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAoFq47mSwdtiTSnVc5FDmleVtu-RzhVjk",
+  authDomain: "inaaya-app-60443.firebaseapp.com",
+  projectId: "inaaya-app-60443",
+  storageBucket: "inaaya-app-60443.firebasestorage.app",
+  messagingSenderId: "929301648426",
+  appId: "1:929301648426:web:b933bbc4021f1187641f53"
+};
 var SYNC_RE = /^inaaya-(routine|week|album|settings|parent-pin)/;
 var DEVICE_ONLY = ["sound","voice","voiceURI"];            // settings each device keeps for itself
 var sync = Object.assign({code:"",device:""}, store.get("inaaya-sync")||{});
@@ -1302,7 +1309,7 @@ async function syncConnect(){
       const changed=new Set(),remote={};
       snap.docChanges().forEach(ch=>{
         const k=ch.doc.id,d=ch.doc.data();remote[k]=d.t;
-        if(d.t>(syncMeta[k]||0)&&!(d.by===sync.device&&d.t===syncMeta[k])){syncApply(k,d.v);syncMeta[k]=d.t;changed.add(k)}
+        if(d.t>(syncMeta[k]||0)){syncApply(k,d.v);syncMeta[k]=d.t;changed.add(k)}
       });
       if(first){
         // first contact: send up anything this device has that the family copy doesn't (or has older)
@@ -1362,6 +1369,9 @@ $("syncStart").addEventListener("click",()=>{sync.code=newCode();saveSync();pain
 $("syncJoin").addEventListener("click",async()=>{
   const c=$("syncCodeIn").value.toUpperCase().replace(/[^A-Z0-9]/g,"");
   if(c.length!==16){$("syncStatus").className="gnote err";$("syncStatus").textContent="That code should have 16 letters and numbers. Check it and try again.";return}
+  // A joining device defers to the family copy: anything both have (PIN, days, stickers) comes from the family.
+  for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(SYNC_RE.test(k)) syncMeta[k]=0}
+  try{localStorage.setItem("inaaya-sync-meta",JSON.stringify(syncMeta))}catch(e){}
   sync.code=c;saveSync();paintSync();await syncConnect();
 });
 $("syncCopy").addEventListener("click",e=>{
