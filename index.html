@@ -250,6 +250,11 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
 .gnote{font-size:13px;font-weight:700;color:var(--ink-2);margin:0}
 .gnote.ok{color:var(--noon)}
 .gnote.err{color:var(--all)}
+.charlist{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.charbtn{display:flex;align-items:center;gap:8px;text-align:left;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:6px 8px}
+.charbtn .ce{font-size:28px;line-height:1}
+.charbtn b{display:block;font-family:var(--display);font-weight:600;font-size:14px}
+.charbtn small{display:block;font-size:11px;font-weight:700;color:var(--ink-2)}
 .famcode{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-weight:700;font-size:22px;letter-spacing:.08em;background:var(--bg);border:2px dashed var(--line);border-radius:12px;padding:10px 12px;text-align:center;-webkit-user-select:all;user-select:all}
 .syncdot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--line);vertical-align:middle}
 .syncdot.on{background:var(--noon)}.syncdot.wait{background:var(--gold)}.syncdot.bad{background:var(--all)}
@@ -550,6 +555,8 @@ button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid 
         <button type="button" class="gbtn" id="voiceBtn" aria-pressed="true">Read aloud: On</button>
         <button type="button" class="gbtn" id="cartoonBtn" aria-pressed="true">Cartoon voices: On</button>
       </div>
+      <span class="gnote">Meet the characters (tap to hear each one):</span>
+      <div class="charlist" id="charList"></div>
       <p class="gnote">For a much nicer voice on iPad or iPhone: Settings → Accessibility → Spoken Content → Voices → English, and download an “Enhanced” or “Premium” voice (Ava, Zoe or Serena are good). Then pick it above. Sounds are silent when the device is on silent.</p>
     </div>
     <div class="gblock">
@@ -723,24 +730,34 @@ const SFX = {
 };
 
 /* ---------- cartoon characters who take turns cheering ---------- */
-// Built from the device's own voices: pitch and speed make the character; Apple's fun voices are used when present.
+// Each character asks for its own voice, in order of preference. Apple's standard and fun voices
+// (Junior, Kathy, Ralph, Fred, Zarvox, Trinoids…) come first; "Enhanced"/"Premium" copies are skipped
+// for characters because iPhone and iPad play those without changing pitch or speed.
 const CHARACTERS = [
-  {e:"🐿️",n:"Squeaky Squirrel",pitch:2,rate:1.15,high:true,sfx:"squeak",hi:["Squeak squeak!","Nuts about you!","Wheee!"]},
-  {e:"🐻",n:"Big Bear",pitch:.55,rate:.82,sfx:"growl",hi:["Grrreat!","Beary good!","Big bear hug!"]},
-  {e:"🤖",n:"Robo",pitch:.8,rate:.92,sfx:"robot",novel:"Zarvox|Trinoids",hi:["Beep boop!","Super star detected!","Awesome level: one hundred!"]},
-  {e:"🦄",n:"Sparkle",pitch:1.6,rate:1,high:true,sfx:"sparkle",hi:["Sparkle sparkle!","Magical!","Rainbow power!"]},
-  {e:"🐸",n:"Froggy",pitch:1.3,rate:1.3,high:true,sfx:"ribbit",hi:["Ribbit!","Hop hop hooray!","Toad-ally awesome!"]},
-  {e:"🦖",n:"Dino",pitch:.5,rate:.9,sfx:"roar",hi:["Roooar!","Dino-mite!","Stomp stomp!"]},
-  {e:"👸",n:"Princess",pitch:1.4,rate:.95,high:true,sfx:"harp",hi:["How wonderful!","Simply splendid!","Royally brilliant!"]},
-  {e:"👽",n:"Zib",pitch:1.9,rate:1.35,high:true,sfx:"zap",novel:"Trinoids",hi:["Zip zap!","Out of this world!","Blip blop!"]}
+  {e:"🐿️",n:"Squeaky Squirrel",v:["Junior","Kathy","Samantha","Karen","Zira","Female"],pitch:1.9,rate:1.15,sfx:"squeak",hi:["Squeak squeak!","Nuts about you!","Wheee!"]},
+  {e:"🐻",n:"Big Bear",v:["Ralph","Daniel","Rishi","Gordon","Arthur","David","Male"],pitch:.6,rate:.82,sfx:"growl",hi:["Grrreat!","Beary good!","Big bear hug!"]},
+  {e:"🤖",n:"Robo",v:["Zarvox","Fred","Trinoids","Albert"],pitch:.8,rate:.95,sfx:"robot",hi:["Beep boop!","Super star detected!","Awesome level: one hundred!"]},
+  {e:"🦄",n:"Sparkle",v:["Kathy","Karen","Tessa","Samantha","Zira","Female"],pitch:1.55,rate:1,sfx:"sparkle",hi:["Sparkle sparkle!","Magical!","Rainbow power!"]},
+  {e:"🐸",n:"Froggy",v:["Albert","Junior","Moira","Rishi","Mark"],pitch:1.35,rate:1.3,sfx:"ribbit",hi:["Ribbit!","Hop hop hooray!","Toad-ally awesome!"]},
+  {e:"🦖",n:"Dino",v:["Ralph","Fred","Daniel","Gordon","Aaron","David","Male"],pitch:.5,rate:.88,sfx:"roar",hi:["Roooar!","Dino-mite!","Stomp stomp!"]},
+  {e:"👸",n:"Princess",v:["Moira","Serena","Kate","Karen","Tessa","Martha","Hazel","Female"],pitch:1.3,rate:.95,sfx:"harp",hi:["How wonderful!","Simply splendid!","Royally brilliant!"]},
+  {e:"👽",n:"Zib",v:["Trinoids","Zarvox","Junior","Whisper","Samantha","Tessa"],pitch:1.8,rate:1.3,sfx:"zap",hi:["Zip zap!","Out of this world!","Blip blop!"]}
 ];
-const MALE_V=/Daniel|Aaron|Arthur|Gordon|Rishi|Alex\b|Tom\b|Oliver|Evan|Nathan|David|Mark|Guy|Ryan|George|Thomas|Male/i;
+const HQ_V=/enhanced|premium|natural|neural|siri/i;
 function charVoice(c){
-  if(c.novel){const v=voices.find(v=>new RegExp(c.novel,"i").test(v.name));if(v) return {voice:v,pitch:1,rate:1}}
-  const good=voices.filter(v=>voiceRank(v)>-20);
-  let pool=settings.voiceURI?[]:good.filter(v=>c.high?!MALE_V.test(v.name):MALE_V.test(v.name));
-  const v=pool.sort((a,b)=>voiceRank(b)-voiceRank(a))[0]||pickVoice();
-  return {voice:v,pitch:c.pitch,rate:c.rate};
+  const plain=voices.filter(v=>!HQ_V.test(v.name));
+  const used=new Set();                      // try not to give two characters the same voice
+  CHARACTERS.forEach(o=>{if(o!==c&&o._v) used.add(o._v.voiceURI)});
+  const match=want=>{const re=new RegExp("\\b"+want+"\\b","i");return plain.filter(x=>re.test(x.name))};
+  let v=null;
+  for(const want of c.v){v=match(want).find(x=>!used.has(x.voiceURI));if(v) break}     // first choice nobody else has
+  if(!v) v=plain.find(x=>!used.has(x.voiceURI)&&voiceRank(x)>-20&&!/news|bells|organ|cellos|superstar|wobble|bahh|boing|bubbles|jester/i.test(x.name));
+  if(!v) for(const want of c.v){v=match(want)[0];if(v) break}                         // share a voice if we must
+  if(!v) v=plain.find(x=>voiceRank(x)>-20)||plain[0]||pickVoice();   // a pitch-friendly voice beats a premium one here
+  c._v=v;
+  // Apple's fun voices already sound like characters, so play them as they are
+  const fun=v&&/Zarvox|Trinoids|Albert|Whisper/i.test(v.name);
+  return {voice:v,pitch:fun?1:c.pitch,rate:fun?1:c.rate};
 }
 let lastChar=-1,buddyTimer=0;
 function cheer(text){
@@ -752,7 +769,14 @@ function cheer(text){
   b.hidden=false;b.classList.remove("in");void b.offsetWidth;b.classList.add("in");
   clearTimeout(buddyTimer);buddyTimer=setTimeout(()=>{b.hidden=true},Math.max(2600,line.length*75));
   SFX[c.sfx]?.();
-  setTimeout(()=>speak(line,charVoice(c)),240);
+  speak(line,charVoice(c));   // straight away: iPhone and iPad can drop speech that starts after a delay
+}
+function sayAs(i,text){
+  const c=CHARACTERS[i],b=$("buddy");
+  b.querySelector(".be").textContent=c.e;b.querySelector(".bb").textContent=text;
+  b.hidden=false;b.classList.remove("in");void b.offsetWidth;b.classList.add("in");
+  clearTimeout(buddyTimer);buddyTimer=setTimeout(()=>{b.hidden=true},2800);
+  SFX[c.sfx]?.();speak(text,charVoice(c));
 }
 const PART_SAY={"Wake up":"Time to wake up!","Breakfast":"Breakfast time!","School":"Time for school!","After school":"Home from school! Bath, lunch and rest.",
   "Homework & play":"Homework and play time!","Learn & help":"Time to learn and help!","Midday":"It's lunchtime!","Play time":"It's play time!",
@@ -763,6 +787,7 @@ const partSay = p => PART_SAY[p.t]||p.t+"!";
 let voices=[];
 function loadVoices(){
   try{voices=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang))}catch(e){voices=[]}
+  if(typeof CHARACTERS!=="undefined") CHARACTERS.forEach(c=>c._v=null);
   const sel=$("voiceSel");if(!sel) return;
   sel.innerHTML='<option value="">Best available (automatic)</option>'+voices.map(v=>`<option value="${v.voiceURI}">${v.name} (${v.lang})</option>`).join("");
   sel.value=settings.voiceURI&&voices.some(v=>v.voiceURI===settings.voiceURI)?settings.voiceURI:"";
@@ -1107,6 +1132,8 @@ function paintGrown(){
   $("reset").disabled=!!state.saved;
   $("soundBtn").setAttribute("aria-pressed",settings.sound);$("soundBtn").textContent="Sound effects: "+(settings.sound?"On":"Off");
   $("voiceBtn").setAttribute("aria-pressed",settings.voice);$("voiceBtn").textContent="Read aloud: "+(settings.voice?"On":"Off");
+  CHARACTERS.forEach(c=>c._v=null);
+  $("charList").innerHTML=CHARACTERS.map((c,i)=>{const v=charVoice(c).voice;return `<button type="button" class="charbtn" data-char="${i}"><span class="ce">${c.e}</span><span><b>${c.n}</b><small>${v?v.name:"default voice"}</small></span></button>`}).join("");
   $("cartoonBtn").setAttribute("aria-pressed",settings.cartoon);$("cartoonBtn").textContent="Cartoon voices: "+(settings.cartoon?"On":"Off");
   $("goalSel").value=String(settings.weekGoal);
   const wk=loadWeek(mondayOf(today));if(document.activeElement!==$("rewardIn")) $("rewardIn").value=wk.reward;
@@ -1121,6 +1148,7 @@ $("dayType").addEventListener("change",e=>{
 $("saveDay").addEventListener("click",()=>{state.saved=Date.now();save();paint()});
 $("unlockDay").addEventListener("click",()=>{state.saved=null;save();paint()});
 $("soundBtn").addEventListener("click",()=>{settings.sound=!settings.sound;saveSettings();paintGrown();SFX.tick()});
+$("charList").addEventListener("click",e=>{const b=e.target.closest("[data-char]");if(b){const i=+b.dataset.char,c=CHARACTERS[i];sayAs(i,`${c.hi[0]} I'm ${c.n}! Great job, Inaaya!`)}});
 $("cartoonBtn").addEventListener("click",()=>{settings.cartoon=!settings.cartoon;saveSettings();paintGrown();cheer("Cartoon voices are on!")});
 $("voiceBtn").addEventListener("click",()=>{settings.voice=!settings.voice;saveSettings();paintGrown();speak("Read aloud is on")});
 $("voiceSel").addEventListener("change",e=>{settings.voiceURI=e.target.value;saveSettings();speak("Hi Inaaya! Brush teeth. Sparkly clean teeth!")});
